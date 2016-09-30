@@ -52,6 +52,8 @@ class Canvas {
         }
     }
     handleMouseDown() {
+        if(!this.figures.selected)
+            this.figures.selected = this.figures.getFigure(this.mouseInfo.position);
         if (this.figures.selected) {
             for (let grabPoint in this.figures.selected.grabPoints)
                 if (this.figures.selected.grabPoints[grabPoint].position.distanceTo(this.mouseInfo.position) < 10) {
@@ -63,22 +65,23 @@ class Canvas {
                 if (this.figures.selected.isInFigure(this.mouseInfo.position)) {
                     this.movePoint = this.mouseInfo.position.clone().sub(this.figures.selected.position);
                 }
+            if (!this.figures.selected.selectedGrabPoint && !this.movePoint){
+                this.figures.selected = this.figures.getFigure(this.mouseInfo.position);
+                this.handleMouseDown();
+            }
         }
     }
 
     handleMouseUp() {
         if (this.figures.selected) {
-            if (!this.figures.selected.selectedGrabPoint && !this.movePoint) {
-                this.figures.selected = this.figures.getFigure(this.mouseInfo.position);
-            } else if (this.movePoint) {
+            if (this.movePoint) {
                 delete this.movePoint;
                 this.figures.selected.calculateGrabPoints();
             } else {
                 delete this.figures.selected.selectedGrabPoint;
                 this.figures.selected.calculateGrabPoints();
             }
-        } else
-            this.figures.selected = this.figures.getFigure(this.mouseInfo.position);
+        }
     }
 
     render() {
