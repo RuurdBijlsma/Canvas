@@ -23,7 +23,6 @@ class Canvas {
             mouseDown: false
         };
         element.addEventListener('mousedown', function() {
-            canvas.mouseInfo.mouseDown = true;
             canvas.handleMouseDown();
         }, false);
         element.addEventListener('mouseup', function() {
@@ -35,7 +34,11 @@ class Canvas {
             canvas.handleMove(x, y);
         }, false);
 
-        element.addEventListener('touchstart', function() {
+        element.addEventListener('touchstart', function(e) {
+            let x = e.touches[0].pageX - canvas.element.offsetLeft,
+                y = e.touches[0].pageY - canvas.element.offsetTop;
+            canvas.handleMove(x, y);
+
             canvas.handleMouseDown();
         }, false);
         element.addEventListener('touchend', function() {
@@ -44,6 +47,7 @@ class Canvas {
         element.addEventListener('touchmove', function(e) {
             let x = e.touches[0].pageX - canvas.element.offsetLeft,
                 y = e.touches[0].pageY - canvas.element.offsetTop;
+
             canvas.handleMove(x, y);
         }, false);
 

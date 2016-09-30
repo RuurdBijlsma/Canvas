@@ -17,12 +17,10 @@ html {
     background-color: rgba(0, 0, 0, 0.9);
     color: rgba(0, 0, 0, 0.8);
     height: 100%;
-    overflow-y: hidden;
 }
 
 body {
     height: 100%;
-    overflow-y: hidden;
 }
 
 #renderer {
@@ -30,7 +28,6 @@ body {
     width: 1000px;
     height: 1000px;
     position: absolute;
-    overflow-y: hidden;
 }
 
 ::-webkit-scrollbar {
