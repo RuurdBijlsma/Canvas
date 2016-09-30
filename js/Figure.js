@@ -10,16 +10,16 @@ class Figure {
         this.zIndexUpdated = function() {};
         this.zIndex = zIndex;
     }
-    set width(val){
-        if(val<0)
-            val=0;
+    set width(val) {
+        if (val < 0)
+            val = 0;
         this._width = val;
     }
-    get width(){
+    get width() {
         return this._width;
     }
     calculateGrabPoints() {
-        let figure=this;
+        let figure = this;
         this.grabPoints = {
             left: {
                 position: new Vector2(
@@ -27,9 +27,9 @@ class Figure {
                     this.position.y + this.height / 2
                 ),
                 action: function(mousePos) {
-                    if(mousePos.x >= figure.position.x + figure.width)
-                        figure.selectedGrabPoint=figure.grabPoints.right;
-                    else{
+                    if (mousePos.x >= figure.position.x + figure.width)
+                        figure.selectedGrabPoint = figure.grabPoints.right;
+                    else {
                         figure.width += figure.position.x - mousePos.x;
                         figure.position.x = mousePos.x;
                     }
@@ -41,9 +41,9 @@ class Figure {
                     this.position.y + this.height / 2
                 ),
                 action: function(mousePos) {
-                    if(mousePos.x <= figure.position.x)
+                    if (mousePos.x <= figure.position.x)
                         figure.selectedGrabPoint = figure.grabPoints.left;
-                    else{
+                    else {
                         figure.width = mousePos.x - figure.position.x;
                     }
                 }
@@ -54,9 +54,9 @@ class Figure {
                     this.position.y
                 ),
                 action: function(mousePos) {
-                    if(mousePos.y >= figure.position.y + figure.height)
-                        figure.selectedGrabPoint=figure.grabPoints.bottom;
-                    else{
+                    if (mousePos.y >= figure.position.y + figure.height)
+                        figure.selectedGrabPoint = figure.grabPoints.bottom;
+                    else {
                         figure.height += figure.position.y - mousePos.y;
                         figure.position.y = mousePos.y;
                     }
@@ -68,9 +68,9 @@ class Figure {
                     this.position.y + this.height
                 ),
                 action: function(mousePos) {
-                    if(mousePos.y <= figure.position.y)
+                    if (mousePos.y <= figure.position.y)
                         figure.selectedGrabPoint = figure.grabPoints.top;
-                    else{
+                    else {
                         figure.height = mousePos.y - figure.position.y;
                     }
                 }
@@ -81,11 +81,11 @@ class Figure {
                     this.position.y
                 ),
                 action: function(mousePos) {
-                    if(mousePos.x >= figure.position.x + figure.width)
+                    if (mousePos.x >= figure.position.x + figure.width)
                         figure.selectedGrabPoint = figure.grabPoints.topRight;
-                    else if(mousePos.y >= figure.position.y + figure.height)
+                    else if (mousePos.y >= figure.position.y + figure.height)
                         figure.selectedGrabPoint = figure.grabPoints.bottomLeft;
-                    else{
+                    else {
                         figure.height += figure.position.y - mousePos.y;
                         figure.position.y = mousePos.y;
                         figure.width += figure.position.x - mousePos.x;
@@ -99,11 +99,11 @@ class Figure {
                     this.position.y
                 ),
                 action: function(mousePos) {
-                    if(mousePos.x <= figure.position.x)
+                    if (mousePos.x <= figure.position.x)
                         figure.selectedGrabPoint = figure.grabPoints.topLeft;
-                    else if(mousePos.y >= figure.position.y + figure.height)
+                    else if (mousePos.y >= figure.position.y + figure.height)
                         figure.selectedGrabPoint = figure.grabPoints.bottomRight;
-                    else{
+                    else {
                         figure.height += figure.position.y - mousePos.y;
                         figure.position.y = mousePos.y;
                         figure.width = mousePos.x - figure.position.x;
@@ -116,13 +116,13 @@ class Figure {
                     this.position.y + this.height
                 ),
                 action: function(mousePos) {
-                    if(mousePos.x >= figure.position.x + figure.width)
+                    if (mousePos.x >= figure.position.x + figure.width)
                         figure.selectedGrabPoint = figure.grabPoints.bottomRight;
-                    else if(mousePos.y <= figure.position.y)
+                    else if (mousePos.y <= figure.position.y)
                         figure.selectedGrabPoint = figure.grabPoints.topLeft;
-                    else{
+                    else {
                         figure.width += figure.position.x - mousePos.x;
-                        figure.position.x=mousePos.x;
+                        figure.position.x = mousePos.x;
                         figure.height = mousePos.y - figure.position.y;
                     }
                 }
@@ -133,11 +133,11 @@ class Figure {
                     this.position.y + this.height
                 ),
                 action: function(mousePos) {
-                    if(mousePos.x <= figure.position.x)
+                    if (mousePos.x <= figure.position.x)
                         figure.selectedGrabPoint = figure.grabPoints.bottomLeft;
-                    else if(mousePos.y <= figure.position.y)
+                    else if (mousePos.y <= figure.position.y)
                         figure.selectedGrabPoint = figure.grabPoints.topRight;
-                    else{
+                    else {
                         figure.width = mousePos.x - figure.position.x;
                         figure.height = mousePos.y - figure.position.y;
                     }

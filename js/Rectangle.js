@@ -1,5 +1,5 @@
 class Rectangle extends Figure {
-    constructor(position, width, height, color='black', zIndex=0) {
+    constructor(position, width, height, color = 'black', zIndex = 0) {
         super(position, width, height, color, zIndex);
     }
     draw(canvas) {

@@ -1,26 +1,26 @@
-class FigureCollection extends Array{
-    constructor(...figures){
+class FigureCollection extends Array {
+    constructor(...figures) {
         super();
-        for(let item of figures){
+        for (let item of figures) {
             super.push(item);
 
             let that = this;
-            item.zIndexUpdated = function(){
+            item.zIndexUpdated = function() {
                 that.sort();
             }
         }
         this.sort();
         this.selected = null;
     }
-    sort(){
+    sort() {
         super.sort((a, b) => a.zIndex > b.zIndex);
     }
-    push(...figures){
-        for(let item of figures){
+    push(...figures) {
+        for (let item of figures) {
             super.push(item);
 
             let that = this;
-            item.zIndexUpdated = function(){
+            item.zIndexUpdated = function() {
                 that.sort();
             }
         }
@@ -32,9 +32,9 @@ class FigureCollection extends Array{
 
         this.sort();
     }
-    getFigure(position){
-        for(let i=this.length-1; i>=0; i--){
-            if(this[i].isInFigure(position))
+    getFigure(position) {
+        for (let i = this.length - 1; i >= 0; i--) {
+            if (this[i].isInFigure(position))
                 return this[i];
         }
         return null;

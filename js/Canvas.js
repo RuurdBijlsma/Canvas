@@ -7,10 +7,10 @@ class Canvas {
         this.width = 1000;
         this.height = 1000;
 
-        this.setCanvasSize(this);
+        this.setCanvasSize();
         let canvas = this;
         window.addEventListener('resize', function() {
-            canvas.setCanvasSize(canvas);
+            canvas.setCanvasSize();
         }, false);
 
         this.figures = new FigureCollection(
@@ -34,82 +34,97 @@ class Canvas {
             canvas.handleMove(e);
         }, false);
 
-        this.render(this);
+        this.render();
     }
 
     handleMove(event) {
-        let x = event.pageX - canvas.element.offsetLeft,
-            y = event.pageY - canvas.element.offsetTop;
-        canvas.mouseInfo.position.x = x;
-        canvas.mouseInfo.position.y = y;
+        let x = event.pageX - this.element.offsetLeft,
+            y = event.pageY - this.element.offsetTop;
+        this.mouseInfo.position.x = x;
+        this.mouseInfo.position.y = y;
 
-        if(canvas.figures.selected && canvas.figures.selected.selectedGrabPoint)
-            canvas.figures.selected.selectedGrabPoint.action(canvas.mouseInfo.position);
+        if (this.figures.selected && this.figures.selected.selectedGrabPoint)
+            this.figures.selected.selectedGrabPoint.action(this.mouseInfo.position);
+
+        if (this.movePoint) {
+            this.figures.selected.position.x = this.mouseInfo.position.x - this.movePoint.x;
+            this.figures.selected.position.y = this.mouseInfo.position.y - this.movePoint.y;
+        }
     }
-    handleMouseDown(){
-        if(this.figures.selected)
+    handleMouseDown() {
+        if (this.figures.selected) {
             for (let grabPoint in this.figures.selected.grabPoints)
-                if (this.figures.selected.grabPoints[grabPoint].position.distanceTo(this.mouseInfo.position) < 10){
+                if (this.figures.selected.grabPoints[grabPoint].position.distanceTo(this.mouseInfo.position) < 10) {
                     this.figures.selected.selectedGrabPoint = this.figures.selected.grabPoints[grabPoint];
                     break;
                 }
+
+            if (!this.figures.selected.selectedGrabPoint)
+                if (this.figures.selected.isInFigure(this.mouseInfo.position)) {
+                    this.movePoint = this.mouseInfo.position.clone().sub(this.figures.selected.position);
+                }
+        }
     }
 
-    handleMouseUp(){
-        if(this.figures.selected)
-            if(!this.figures.selected.selectedGrabPoint)
+    handleMouseUp() {
+        if (this.figures.selected) {
+            if (!this.figures.selected.selectedGrabPoint && !this.movePoint) {
                 this.figures.selected = this.figures.getFigure(this.mouseInfo.position);
-            else{
-                this.figures.selected.selectedGrabPoint = undefined;
+            } else if (this.movePoint) {
+                delete this.movePoint;
+                this.figures.selected.calculateGrabPoints();
+            } else {
+                delete this.figures.selected.selectedGrabPoint;
                 this.figures.selected.calculateGrabPoints();
             }
-        else
+        } else
             this.figures.selected = this.figures.getFigure(this.mouseInfo.position);
     }
 
-    render(canvas) {
-        canvas.context.clearRect(0, 0, canvas.width, canvas.height);
+    render() {
+        this.context.clearRect(0, 0, this.width, this.height);
 
-        for (let figure of canvas.figures)
-            figure.draw(canvas);
+        for (let figure of this.figures)
+            figure.draw(this);
 
-        if (canvas.figures.selected) {
-            canvas.context.strokeStyle = '#aa4400';
-            canvas.context.lineWidth = 2;
-            canvas.context.strokeRect(canvas.figures.selected.position.x, canvas.figures.selected.position.y, canvas.figures.selected.width, canvas.figures.selected.height);
+        if (this.figures.selected) {
+            this.context.strokeStyle = '#aa4400';
+            this.context.lineWidth = 2;
+            this.context.strokeRect(this.figures.selected.position.x, this.figures.selected.position.y, this.figures.selected.width, this.figures.selected.height);
         }
 
+        let canvas = this;
         requestAnimationFrame(function() {
-            canvas.render(canvas);
+            canvas.render();
         });
     }
 
-    setCanvasSize(canvas) {
-        canvas.context.clearRect(0, 0, canvas.width, canvas.height);
+    setCanvasSize() {
+        this.context.clearRect(0, 0, this.width, this.height);
 
         let windowWidth = window.innerWidth,
             windowHeight = window.innerHeight,
             windowRatio = windowWidth / windowHeight;
 
-        if (windowRatio > canvas.ratio) {
-            canvas.width = windowHeight * canvas.ratio;
-            canvas.height = windowHeight;
+        if (windowRatio > this.ratio) {
+            this.width = windowHeight * this.ratio;
+            this.height = windowHeight;
 
-            canvas.element.style.top = '0px';
-            canvas.element.style.left = 'calc(50% - ' + canvas.width / 2 + 'px)';
+            this.element.style.top = '0px';
+            this.element.style.left = 'calc(50% - ' + this.width / 2 + 'px)';
         } else {
             console.log('2');
-            canvas.width = windowWidth;
-            canvas.height = windowWidth / canvas.ratio;
+            this.width = windowWidth;
+            this.height = windowWidth / this.ratio;
 
-            canvas.element.style.top = 'calc(50% - ' + canvas.height / 2 + 'px)';
-            canvas.element.style.left = '0px';
+            this.element.style.top = 'calc(50% - ' + this.height / 2 + 'px)';
+            this.element.style.left = '0px';
         }
 
-        canvas.element.style.width = canvas.width + 'px';
-        canvas.element.style.height = canvas.height + 'px';
+        this.element.style.width = this.width + 'px';
+        this.element.style.height = this.height + 'px';
 
-        canvas.element.width = canvas.width;
-        canvas.element.height = canvas.height;
+        this.element.width = this.width;
+        this.element.height = this.height;
     }
 }
