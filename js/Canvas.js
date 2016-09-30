@@ -27,19 +27,30 @@ class Canvas {
             canvas.handleMouseDown();
         }, false);
         element.addEventListener('mouseup', function() {
-            canvas.mouseInfo.mouseDown = false;
             canvas.handleMouseUp();
         }, false);
         element.addEventListener('mousemove', function(e) {
-            canvas.handleMove(e);
+            let x = e.pageX - canvas.element.offsetLeft,
+                y = e.pageY - canvas.element.offsetTop;
+            canvas.handleMove(x, y);
+        }, false);
+
+        element.addEventListener('touchstart', function() {
+            canvas.handleMouseDown();
+        }, false);
+        element.addEventListener('touchend', function() {
+            canvas.handleMouseUp();
+        }, false);
+        element.addEventListener('touchmove', function(e) {
+            let x = e.touches[0].pageX - canvas.element.offsetLeft,
+                y = e.touches[0].pageY - canvas.element.offsetTop;
+            canvas.handleMove(x, y);
         }, false);
 
         this.render();
     }
 
-    handleMove(event) {
-        let x = event.pageX - this.element.offsetLeft,
-            y = event.pageY - this.element.offsetTop;
+    handleMove(x, y) {
         this.mouseInfo.position.x = x;
         this.mouseInfo.position.y = y;
 
@@ -52,6 +63,8 @@ class Canvas {
         }
     }
     handleMouseDown() {
+        this.mouseInfo.mouseDown = true;
+
         if(!this.figures.selected)
             this.figures.selected = this.figures.getFigure(this.mouseInfo.position);
         if (this.figures.selected) {
@@ -73,6 +86,8 @@ class Canvas {
     }
 
     handleMouseUp() {
+        this.mouseInfo.mouseDown = false;
+
         if (this.figures.selected) {
             if (this.movePoint) {
                 delete this.movePoint;
