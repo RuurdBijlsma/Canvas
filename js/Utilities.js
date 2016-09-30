@@ -4,6 +4,6 @@ class Vector2 {
         this.y = y;
     }
     distanceTo(vector){
-        return Math.sqrt(this.x*this.x + vector.x*vector.x);
+        return Math.sqrt(Math.pow(this.x - vector.x, 2) + Math.pow(this.y - vector.y, 2));
     }
 }

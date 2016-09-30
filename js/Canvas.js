@@ -22,31 +22,49 @@ class Canvas {
             position: new Vector2(),
             mouseDown: false
         };
-        element.addEventListener('click', function() {
-            canvas.handleClick(canvas);
-        }, false);
         element.addEventListener('mousedown', function() {
             canvas.mouseInfo.mouseDown = true;
+            canvas.handleMouseDown();
         }, false);
         element.addEventListener('mouseup', function() {
             canvas.mouseInfo.mouseDown = false;
+            canvas.handleMouseUp();
         }, false);
         element.addEventListener('mousemove', function(e) {
-            canvas.handleMove(e, canvas);
+            canvas.handleMove(e);
         }, false);
 
         this.render(this);
     }
 
-    handleMove(event, canvas) {
+    handleMove(event) {
         let x = event.pageX - canvas.element.offsetLeft,
             y = event.pageY - canvas.element.offsetTop;
         canvas.mouseInfo.position.x = x;
         canvas.mouseInfo.position.y = y;
+
+        if(canvas.figures.selected && canvas.figures.selected.selectedGrabPoint)
+            canvas.figures.selected.selectedGrabPoint.action(canvas.mouseInfo.position);
+    }
+    handleMouseDown(){
+        if(this.figures.selected)
+            for (let grabPoint in this.figures.selected.grabPoints)
+                if (this.figures.selected.grabPoints[grabPoint].position.distanceTo(this.mouseInfo.position) < 10){
+                    this.figures.selected.selectedGrabPoint = this.figures.selected.grabPoints[grabPoint];
+                    break;
+                }
     }
 
-    handleClick(canvas) {
-        canvas.figures.selected = canvas.figures.getFigure(canvas.mouseInfo.position);
+    handleMouseUp(){
+        if(this.figures.selected)
+            if(!this.figures.selected.selectedGrabPoint)
+                this.figures.selected = this.figures.getFigure(this.mouseInfo.position);
+            else{
+                this.figures.selected.selectedGrabPoint = undefined;
+                this.figures.selected.calculateGrabPoints();
+            }
+        else
+            this.figures.selected = this.figures.getFigure(this.mouseInfo.position);
     }
 
     render(canvas) {
