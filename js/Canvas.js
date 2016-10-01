@@ -51,6 +51,8 @@ class Canvas {
             canvas.handleMove(x, y);
         }, false);
 
+        this.grabPointSize = 10;
+
         this.render();
     }
 
@@ -58,12 +60,15 @@ class Canvas {
         this.mouseInfo.position.x = x;
         this.mouseInfo.position.y = y;
 
-        if (this.figures.selected && this.figures.selected.selectedGrabPoint)
+        if (this.figures.selected && this.figures.selected.selectedGrabPoint){
             this.figures.selected.selectedGrabPoint.action(this.mouseInfo.position);
+            this.figures.selected.calculateGrabPoints();
+        }
 
         if (this.movePoint) {
             this.figures.selected.position.x = this.mouseInfo.position.x - this.movePoint.x;
             this.figures.selected.position.y = this.mouseInfo.position.y - this.movePoint.y;
+            this.figures.selected.calculateGrabPoints();
         }
     }
     handleMouseDown() {
@@ -73,7 +78,7 @@ class Canvas {
             this.figures.selected = this.figures.getFigure(this.mouseInfo.position);
         if (this.figures.selected) {
             for (let grabPoint in this.figures.selected.grabPoints)
-                if (this.figures.selected.grabPoints[grabPoint].position.distanceTo(this.mouseInfo.position) < 10) {
+                if (this.figures.selected.grabPoints[grabPoint].position.distanceTo(this.mouseInfo.position) < this.grabPointSize) {
                     this.figures.selected.selectedGrabPoint = this.figures.selected.grabPoints[grabPoint];
                     break;
                 }
@@ -111,8 +116,15 @@ class Canvas {
 
         if (this.figures.selected) {
             this.context.strokeStyle = '#aa4400';
+            this.context.fillStyle = '#aa4400';
             this.context.lineWidth = 2;
             this.context.strokeRect(this.figures.selected.position.x, this.figures.selected.position.y, this.figures.selected.width, this.figures.selected.height);
+            for(let grabPoint in this.figures.selected.grabPoints){
+                let pos = this.figures.selected.grabPoints[grabPoint].position;
+                this.context.beginPath();
+                this.context.ellipse(pos.x, pos.y, this.grabPointSize / 2, this.grabPointSize / 2, 0, Math.PI * 2, 0);
+                this.context.fill();
+            }
         }
 
         let canvas = this;
