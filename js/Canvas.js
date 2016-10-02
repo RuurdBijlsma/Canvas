@@ -59,10 +59,25 @@ class Canvas {
     handleMove(x, y) {
         this.mouseInfo.position.x = x;
         this.mouseInfo.position.y = y;
+        let cursorSet = false;
 
-        if (this.figures.selected && this.figures.selected.selectedGrabPoint){
+        for(let figure of this.figures){
+            if(figure.isInFigure(this.mouseInfo.position)){
+                this.setCursor('move');
+                cursorSet=true;
+            }
+        }
+
+        if (this.figures.selected && this.figures.selected.selectedGrabPoint) {
             this.figures.selected.selectedGrabPoint.action(this.mouseInfo.position);
             this.figures.selected.calculateGrabPoints();
+            cursorSet = true;
+        } else if (this.figures.selected) {
+            for (let grabPoint in this.figures.selected.grabPoints)
+                if (this.figures.selected.grabPoints[grabPoint].position.distanceTo(this.mouseInfo.position) < this.grabPointSize) {
+                    this.setCursor(grabPoint);
+                    cursorSet = true;
+                }
         }
 
         if (this.movePoint) {
@@ -70,11 +85,14 @@ class Canvas {
             this.figures.selected.position.y = this.mouseInfo.position.y - this.movePoint.y;
             this.figures.selected.calculateGrabPoints();
         }
+
+        if (!cursorSet)
+            this.setCursor('default');
     }
     handleMouseDown() {
         this.mouseInfo.mouseDown = true;
 
-        if(!this.figures.selected)
+        if (!this.figures.selected)
             this.figures.selected = this.figures.getFigure(this.mouseInfo.position);
         if (this.figures.selected) {
             for (let grabPoint in this.figures.selected.grabPoints)
@@ -87,7 +105,7 @@ class Canvas {
                 if (this.figures.selected.isInFigure(this.mouseInfo.position)) {
                     this.movePoint = this.mouseInfo.position.clone().sub(this.figures.selected.position);
                 }
-            if (!this.figures.selected.selectedGrabPoint && !this.movePoint){
+            if (!this.figures.selected.selectedGrabPoint && !this.movePoint) {
                 this.figures.selected = this.figures.getFigure(this.mouseInfo.position);
                 this.handleMouseDown();
             }
@@ -119,7 +137,7 @@ class Canvas {
             this.context.fillStyle = '#aa4400';
             this.context.lineWidth = 2;
             this.context.strokeRect(this.figures.selected.position.x, this.figures.selected.position.y, this.figures.selected.width, this.figures.selected.height);
-            for(let grabPoint in this.figures.selected.grabPoints){
+            for (let grabPoint in this.figures.selected.grabPoints) {
                 let pos = this.figures.selected.grabPoints[grabPoint].position;
                 this.context.beginPath();
                 this.context.ellipse(pos.x, pos.y, this.grabPointSize / 2, this.grabPointSize / 2, 0, Math.PI * 2, 0);
@@ -131,6 +149,32 @@ class Canvas {
         requestAnimationFrame(function() {
             canvas.render();
         });
+    }
+
+    setCursor(type) {
+        let cursor = 'default';
+        switch (type) {
+            case 'left':
+            case 'right':
+                cursor = 'e-resize';
+                break;
+            case 'top':
+            case 'bottom':
+                cursor = 's-resize';
+                break;
+            case 'topRight':
+            case 'bottomLeft':
+                cursor = 'ne-resize';
+                break;
+            case 'bottomRight':
+            case 'topLeft':
+                cursor = 'nw-resize';
+                break;
+            default:
+                cursor= type;
+                break;
+        }
+        this.element.style.cursor = cursor;
     }
 
     setCanvasSize() {
@@ -147,7 +191,6 @@ class Canvas {
             this.element.style.top = '0px';
             this.element.style.left = 'calc(50% - ' + this.width / 2 + 'px)';
         } else {
-            console.log('2');
             this.width = windowWidth;
             this.height = windowWidth / this.ratio;
 
