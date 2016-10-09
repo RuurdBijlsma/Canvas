@@ -55,7 +55,20 @@ class Canvas {
 
         this.grabPointSize = 10;
 
+        document.addEventListener('keydown', function(e) {
+            canvas.handleKeyDown(e);
+        });
+
         this.render();
+    }
+
+    handleKeyDown(e) {
+        if (e.key === 'z' && e.ctrlKey)
+            this.undoStack.undo();
+        if (e.key === 'r' && e.ctrlKey){
+            e.preventDefault();
+            this.undoStack.redo();
+        }
     }
 
     handleMouseDown() {
@@ -63,16 +76,20 @@ class Canvas {
 
         if (!this.figures.selected)
             this.figures.selected = this.figures.getFigure(this.mouseInfo.position);
-        if(this.figures.selected){
+        if (this.figures.selected) {
             for (let grabPoint in this.figures.selected.grabPoints)
                 if (this.figures.selected.grabPoints[grabPoint].position.distanceTo(this.mouseInfo.position) < this.grabPointSize) {
                     this.figures.selected.selectedGrabPoint = this.figures.selected.grabPoints[grabPoint];
+                    console.log('startresize');
+                    this.startResizeSize = [this.figures.selected.cornerPoints.topLeft, this.figures.selected.cornerPoints.bottomRight];
                     break;
                 }
 
             if (!this.figures.selected.selectedGrabPoint)
                 if (this.figures.selected.isInFigure(this.mouseInfo.position)) {
+                    console.log('startmove');
                     this.movePoint = this.mouseInfo.position.clone().sub(this.figures.selected.position);
+                    this.startMovePosition = this.figures.selected.position.clone();
                 }
             if (!this.figures.selected.selectedGrabPoint && !this.movePoint) {
                 this.figures.selected = this.figures.getFigure(this.mouseInfo.position);
@@ -120,8 +137,17 @@ class Canvas {
         if (this.figures.selected) {
             if (this.movePoint) {
                 delete this.movePoint;
+                console.log('endmove', this.startMovePosition.distanceTo(this.figures.selected.position));
+                if (this.startMovePosition.distanceTo(this.figures.selected.position) > 0)
+                    this.undoStack.push(new SetFigurePosition(this.figures.selected, this.startMovePosition, this.figures.selected.position));
                 this.figures.selected.calculateGrabPoints();
             } else {
+                console.log('endresize');
+                let endResizeSize = [this.figures.selected.cornerPoints.topLeft, this.figures.selected.cornerPoints.bottomRight],
+                    distanceTL = this.startResizeSize[0].distanceTo(endResizeSize[0]),
+                    distanceBR = this.startResizeSize[1].distanceTo(endResizeSize[1]);
+                if (distanceTL > 0 || distanceBR > 0)
+                    this.undoStack.push(new SetFigureSize(this.figures.selected, this.startResizeSize, endResizeSize));
                 delete this.figures.selected.selectedGrabPoint;
                 this.figures.selected.calculateGrabPoints();
             }

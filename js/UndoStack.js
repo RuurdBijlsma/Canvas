@@ -4,18 +4,19 @@ class UndoStack extends Array {
         this.index = 0;
     }
     push(command) {
-        if(!'photoshop'){
+        if (!'photoshop') {
             this.splice(this.index++);
             super.push(command);
-        }else{
+        } else {
             this.splice(this.index++, 0, command);
         }
     }
-    undo(){
-        this[this.index--].undo();
+    undo() {
+        if(this.index>0)
+            this[--this.index].undo();
     }
-    redo(){
-        if(this.index<this.length){
+    redo() {
+        if (this.index < this.length) {
             this[this.index++].execute();
         }
     }
