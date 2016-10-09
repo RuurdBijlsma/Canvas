@@ -17,34 +17,36 @@ class Canvas {
             new Rectangle(new Vector2(20, 20), 40, 30, '#ff0000', 1),
             new Ellipsis(new Vector2(20, 40), 120, 50, '#00ff00', 2)
         );
+        this.undoStack = new UndoStack();
 
         this.mouseInfo = {
             position: new Vector2(),
+            startPos: new Vector2(),
             mouseDown: false
         };
-        element.addEventListener('mousedown', function() {
+        document.addEventListener('mousedown', function(e) {
             canvas.handleMouseDown();
         }, false);
-        element.addEventListener('mouseup', function() {
+        document.addEventListener('mouseup', function() {
             canvas.handleMouseUp();
         }, false);
-        element.addEventListener('mousemove', function(e) {
+        document.addEventListener('mousemove', function(e) {
             let x = e.pageX - canvas.element.offsetLeft,
                 y = e.pageY - canvas.element.offsetTop;
             canvas.handleMove(x, y);
         }, false);
 
-        element.addEventListener('touchstart', function(e) {
+        document.addEventListener('touchstart', function(e) {
             let x = e.touches[0].pageX - canvas.element.offsetLeft,
                 y = e.touches[0].pageY - canvas.element.offsetTop;
             canvas.handleMove(x, y);
 
             canvas.handleMouseDown();
         }, false);
-        element.addEventListener('touchend', function() {
+        document.addEventListener('touchend', function() {
             canvas.handleMouseUp();
         }, false);
-        element.addEventListener('touchmove', function(e) {
+        document.addEventListener('touchmove', function(e) {
             let x = e.touches[0].pageX - canvas.element.offsetLeft,
                 y = e.touches[0].pageY - canvas.element.offsetTop;
 
@@ -56,15 +58,37 @@ class Canvas {
         this.render();
     }
 
+    handleMouseDown() {
+        this.mouseInfo.mouseDown = true;
+
+        if (!this.figures.selected)
+            this.figures.selected = this.figures.getFigure(this.mouseInfo.position);
+        if(this.figures.selected){
+            for (let grabPoint in this.figures.selected.grabPoints)
+                if (this.figures.selected.grabPoints[grabPoint].position.distanceTo(this.mouseInfo.position) < this.grabPointSize) {
+                    this.figures.selected.selectedGrabPoint = this.figures.selected.grabPoints[grabPoint];
+                    break;
+                }
+
+            if (!this.figures.selected.selectedGrabPoint)
+                if (this.figures.selected.isInFigure(this.mouseInfo.position)) {
+                    this.movePoint = this.mouseInfo.position.clone().sub(this.figures.selected.position);
+                }
+            if (!this.figures.selected.selectedGrabPoint && !this.movePoint) {
+                this.figures.selected = this.figures.getFigure(this.mouseInfo.position);
+            }
+        }
+    }
+
     handleMove(x, y) {
         this.mouseInfo.position.x = x;
         this.mouseInfo.position.y = y;
         let cursorSet = false;
 
-        for(let figure of this.figures){
-            if(figure.isInFigure(this.mouseInfo.position)){
+        for (let figure of this.figures) {
+            if (figure.isInFigure(this.mouseInfo.position)) {
                 this.setCursor('move');
-                cursorSet=true;
+                cursorSet = true;
             }
         }
 
@@ -89,28 +113,6 @@ class Canvas {
         if (!cursorSet)
             this.setCursor('default');
     }
-    handleMouseDown() {
-        this.mouseInfo.mouseDown = true;
-
-        if (!this.figures.selected)
-            this.figures.selected = this.figures.getFigure(this.mouseInfo.position);
-        if (this.figures.selected) {
-            for (let grabPoint in this.figures.selected.grabPoints)
-                if (this.figures.selected.grabPoints[grabPoint].position.distanceTo(this.mouseInfo.position) < this.grabPointSize) {
-                    this.figures.selected.selectedGrabPoint = this.figures.selected.grabPoints[grabPoint];
-                    break;
-                }
-
-            if (!this.figures.selected.selectedGrabPoint)
-                if (this.figures.selected.isInFigure(this.mouseInfo.position)) {
-                    this.movePoint = this.mouseInfo.position.clone().sub(this.figures.selected.position);
-                }
-            if (!this.figures.selected.selectedGrabPoint && !this.movePoint) {
-                this.figures.selected = this.figures.getFigure(this.mouseInfo.position);
-                this.handleMouseDown();
-            }
-        }
-    }
 
     handleMouseUp() {
         this.mouseInfo.mouseDown = false;
@@ -132,7 +134,7 @@ class Canvas {
         for (let figure of this.figures)
             figure.draw(this);
 
-        if (this.figures.selected) {//draw bounding box
+        if (this.figures.selected) { //draw bounding box
             this.context.strokeStyle = '#aa4400';
             this.context.fillStyle = '#aa4400';
             this.context.lineWidth = 2;

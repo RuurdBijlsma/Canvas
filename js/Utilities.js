@@ -10,8 +10,21 @@ class Vector2 {
         return new Vector2(this.x, this.y);
     }
     sub(vector) {
-        this.x -= vector.x;
-        this.y -= vector.y;
-        return this;
+        let figure = this.clone();
+        figure.x -= vector.x;
+        figure.y -= vector.y;
+        return figure;
+    }
+    add(vector) {
+        let figure = this.clone();
+        figure.x += vector.x;
+        figure.y += vector.y;
+        return figure;
+    }
+    add(x, y) {
+        let figure = this.clone();
+        figure.x += x;
+        figure.y += y;
+        return figure;
     }
 }
