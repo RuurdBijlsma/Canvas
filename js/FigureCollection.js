@@ -15,8 +15,8 @@ class FigureCollection extends Array {
         super.sort((a, b) => a.zIndex > b.zIndex);
     }
     push(...figures) {
-        for (let item of figures) {
-            super.push(item);
+        for (let figure of figures) {
+            super.push(figure);
 
             let that = this;
             if (figure instanceof Figure)

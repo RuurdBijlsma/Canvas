@@ -13,11 +13,10 @@ class Canvas {
             canvas.setCanvasSize();
         }, false);
 
-        this.figures = new FigureCollection(
-            new Rectangle(new Vector2(20, 20), 40, 30, '#ff0000', 1),
-            new Ellipsis(new Vector2(20, 40), 120, 50, '#00ff00', 2)
-        );
+        this.figures = new FigureCollection();
         this.undoStack = new UndoStack();
+
+        IOReader.load('IO.txt').then(group => this.addFigures(group));
 
         this.mouseInfo = {
             position: new Vector2(),
@@ -62,10 +61,39 @@ class Canvas {
         this.render();
     }
 
+    addFigures(group) {
+        let x, y, w, h;
+        for (let child of group.children) {
+            if (child.children)
+                this.addFigures(child);
+            else
+                switch (child.type) {
+                    case 'ellipse':
+                        x = parseInt(child.config[0]);
+                        y = parseInt(child.config[1]);
+                        w = parseInt(child.config[2]);
+                        h = parseInt(child.config[3]);
+                        let ellipsis = new AddEllipsis(x, y, w, h);
+                        ellipsis.execute();
+                        this.undoStack.push(ellipsis);
+                        break;
+                    case 'rectangle':
+                        x = parseInt(child.config[0]);
+                        y = parseInt(child.config[1]);
+                        w = parseInt(child.config[2]);
+                        h = parseInt(child.config[3]);
+                        let rectangle = new AddRectangle(x, y, w, h);
+                        rectangle.execute();
+                        this.undoStack.push(rectangle);
+                        break;
+                }
+        }
+    }
+
     handleKeyDown(e) {
         if (e.key === 'z' && e.ctrlKey)
             this.undoStack.undo();
-        if (e.key === 'r' && e.ctrlKey){
+        if (e.key === 'r' && e.ctrlKey) {
             e.preventDefault();
             this.undoStack.redo();
         }
