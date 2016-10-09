@@ -132,12 +132,12 @@ class Canvas {
         for (let figure of this.figures)
             figure.draw(this);
 
-        if (this.figures.selected) {
+        if (this.figures.selected) {//draw bounding box
             this.context.strokeStyle = '#aa4400';
             this.context.fillStyle = '#aa4400';
             this.context.lineWidth = 2;
             this.context.strokeRect(this.figures.selected.position.x, this.figures.selected.position.y, this.figures.selected.width, this.figures.selected.height);
-            for (let grabPoint in this.figures.selected.grabPoints) {
+            for (let grabPoint in this.figures.selected.grabPoints) { // draw every grab point
                 let pos = this.figures.selected.grabPoints[grabPoint].position;
                 this.context.beginPath();
                 this.context.ellipse(pos.x, pos.y, this.grabPointSize / 2, this.grabPointSize / 2, 0, Math.PI * 2, 0);
@@ -171,7 +171,7 @@ class Canvas {
                 cursor = 'nw-resize';
                 break;
             default:
-                cursor= type;
+                cursor = type;
                 break;
         }
         this.element.style.cursor = cursor;
