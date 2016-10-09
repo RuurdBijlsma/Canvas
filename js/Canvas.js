@@ -93,7 +93,7 @@ class Canvas {
     handleKeyDown(e) {
         if (e.key === 'z' && e.ctrlKey)
             this.undoStack.undo();
-        if (e.key === 'r' && e.ctrlKey) {
+        if (e.key === 'y' && e.ctrlKey) {
             e.preventDefault();
             this.undoStack.redo();
         }
