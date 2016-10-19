@@ -1,9 +1,9 @@
-class IOReader {
+class FileReader {
     static load(file) {
         return new Promise(function(resolve) {
             fetch(file).then(function(resp) {
                 resp.text().then(function(text) {
-                    resolve(IOReader.groupify(IOReader.processText(text)));
+                    resolve(FileReader.groupify(FileReader.processText(text)));
                 });
             });
         });

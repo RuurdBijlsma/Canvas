@@ -16,7 +16,7 @@ class Canvas {
         this.figures = new FigureCollection();
         this.undoStack = new UndoStack();
 
-        IOReader.load('IO.txt').then(group => this.addFigures(group));
+        FileReader.load('IO.txt').then(group=>this.addFigures(group));
 
         this.mouseInfo = {
             position: new Vector2(),
