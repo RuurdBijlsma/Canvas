@@ -13,10 +13,10 @@ class Canvas {
             canvas.setCanvasSize();
         }, false);
 
-        this.figures = new FigureCollection();
+        this.figures = new Group();
         this.undoStack = new UndoStack();
 
-        FileReader.load('IO.txt').then(group=>this.addFigures(group));
+        FileReader.load('IO.txt').then(group => CANVAS.figures = group);
 
         this.mouseInfo = {
             position: new Vector2(),
@@ -61,35 +61,6 @@ class Canvas {
         this.render();
     }
 
-    addFigures(group) {
-        let x, y, w, h;
-        for (let child of group.children) {
-            if (child.children)
-                this.addFigures(child);
-            else
-                switch (child.type) {
-                    case 'ellipse':
-                        x = parseInt(child.config[0]);
-                        y = parseInt(child.config[1]);
-                        w = parseInt(child.config[2]);
-                        h = parseInt(child.config[3]);
-                        let ellipsis = new AddEllipsis(x, y, w, h);
-                        ellipsis.execute();
-                        this.undoStack.push(ellipsis);
-                        break;
-                    case 'rectangle':
-                        x = parseInt(child.config[0]);
-                        y = parseInt(child.config[1]);
-                        w = parseInt(child.config[2]);
-                        h = parseInt(child.config[3]);
-                        let rectangle = new AddRectangle(x, y, w, h);
-                        rectangle.execute();
-                        this.undoStack.push(rectangle);
-                        break;
-                }
-        }
-    }
-
     handleKeyDown(e) {
         if (e.key === 'z' && e.ctrlKey)
             this.undoStack.undo();
@@ -97,30 +68,38 @@ class Canvas {
             e.preventDefault();
             this.undoStack.redo();
         }
+        if (e.key === 'Delete') {
+            if (this.selectedFigure) {
+                let removal = new RemoveFigure(this.selectedFigure);
+                this.undoStack.push(removal);
+                removal.execute();
+                this.selectedFigure = undefined;
+            }
+        }
     }
 
     handleMouseDown() {
         this.mouseInfo.mouseDown = true;
 
-        if (!this.figures.selected)
-            this.figures.selected = this.figures.getFigure(this.mouseInfo.position);
-        if (this.figures.selected) {
-            for (let grabPoint in this.figures.selected.grabPoints)
-                if (this.figures.selected.grabPoints[grabPoint].position.distanceTo(this.mouseInfo.position) < this.grabPointSize) {
-                    this.figures.selected.selectedGrabPoint = this.figures.selected.grabPoints[grabPoint];
+        if (!this.selectedFigure)
+            this.selectedFigure = this.figures.getFigure(this.mouseInfo.position);
+        if (this.selectedFigure) {
+            for (let grabPoint in this.selectedFigure.grabPoints)
+                if (this.selectedFigure.grabPoints[grabPoint].position.distanceTo(this.mouseInfo.position) < this.grabPointSize) {
+                    this.selectedFigure.selectedGrabPoint = this.selectedFigure.grabPoints[grabPoint];
                     console.log('startresize');
-                    this.startResizeSize = [this.figures.selected.cornerPoints.topLeft, this.figures.selected.cornerPoints.bottomRight];
+                    this.startResizeSize = [this.selectedFigure.cornerPoints.topLeft, this.selectedFigure.cornerPoints.bottomRight];
                     break;
                 }
 
-            if (!this.figures.selected.selectedGrabPoint)
-                if (this.figures.selected.isInFigure(this.mouseInfo.position)) {
+            if (!this.selectedFigure.selectedGrabPoint)
+                if (this.selectedFigure.isInFigure(this.mouseInfo.position)) {
                     console.log('startmove');
-                    this.movePoint = this.mouseInfo.position.clone().sub(this.figures.selected.position);
-                    this.startMovePosition = this.figures.selected.position.clone();
+                    this.movePoint = this.mouseInfo.position.clone().sub(this.selectedFigure.position);
+                    this.startMovePosition = this.selectedFigure.position.clone();
                 }
-            if (!this.figures.selected.selectedGrabPoint && !this.movePoint) {
-                this.figures.selected = this.figures.getFigure(this.mouseInfo.position);
+            if (!this.selectedFigure.selectedGrabPoint && !this.movePoint) {
+                this.selectedFigure = this.figures.getFigure(this.mouseInfo.position);
             }
         }
     }
@@ -130,29 +109,27 @@ class Canvas {
         this.mouseInfo.position.y = y;
         let cursorSet = false;
 
-        for (let figure of this.figures) {
-            if (figure.isInFigure(this.mouseInfo.position)) {
-                this.setCursor('move');
-                cursorSet = true;
-            }
+        if (this.figures.getFigure(this.mouseInfo.position)) {
+            this.setCursor('move');
+            cursorSet = true;
         }
 
-        if (this.figures.selected && this.figures.selected.selectedGrabPoint) {
-            this.figures.selected.selectedGrabPoint.action(this.mouseInfo.position);
-            this.figures.selected.calculateGrabPoints();
+        if (this.selectedFigure && this.selectedFigure.selectedGrabPoint) {
+            this.selectedFigure.selectedGrabPoint.action(this.mouseInfo.position);
+            this.selectedFigure.calculateGrabPoints();
             cursorSet = true;
-        } else if (this.figures.selected) {
-            for (let grabPoint in this.figures.selected.grabPoints)
-                if (this.figures.selected.grabPoints[grabPoint].position.distanceTo(this.mouseInfo.position) < this.grabPointSize) {
+        } else if (this.selectedFigure) {
+            for (let grabPoint in this.selectedFigure.grabPoints)
+                if (this.selectedFigure.grabPoints[grabPoint].position.distanceTo(this.mouseInfo.position) < this.grabPointSize) {
                     this.setCursor(grabPoint);
                     cursorSet = true;
                 }
         }
 
         if (this.movePoint) {
-            this.figures.selected.position.x = this.mouseInfo.position.x - this.movePoint.x;
-            this.figures.selected.position.y = this.mouseInfo.position.y - this.movePoint.y;
-            this.figures.selected.calculateGrabPoints();
+            this.selectedFigure.position.x = this.mouseInfo.position.x - this.movePoint.x;
+            this.selectedFigure.position.y = this.mouseInfo.position.y - this.movePoint.y;
+            this.selectedFigure.calculateGrabPoints();
         }
 
         if (!cursorSet)
@@ -162,22 +139,22 @@ class Canvas {
     handleMouseUp() {
         this.mouseInfo.mouseDown = false;
 
-        if (this.figures.selected) {
+        if (this.selectedFigure) {
             if (this.movePoint) {
                 delete this.movePoint;
-                console.log('endmove', this.startMovePosition.distanceTo(this.figures.selected.position));
-                if (this.startMovePosition.distanceTo(this.figures.selected.position) > 0)
-                    this.undoStack.push(new SetFigurePosition(this.figures.selected, this.startMovePosition, this.figures.selected.position));
-                this.figures.selected.calculateGrabPoints();
+                console.log('endmove', this.startMovePosition.distanceTo(this.selectedFigure.position));
+                if (this.startMovePosition.distanceTo(this.selectedFigure.position) > 0)
+                    this.undoStack.push(new SetFigurePosition(this.selectedFigure, this.startMovePosition, this.selectedFigure.position));
+                this.selectedFigure.calculateGrabPoints();
             } else {
                 console.log('endresize');
-                let endResizeSize = [this.figures.selected.cornerPoints.topLeft, this.figures.selected.cornerPoints.bottomRight],
+                let endResizeSize = [this.selectedFigure.cornerPoints.topLeft, this.selectedFigure.cornerPoints.bottomRight],
                     distanceTL = this.startResizeSize[0].distanceTo(endResizeSize[0]),
                     distanceBR = this.startResizeSize[1].distanceTo(endResizeSize[1]);
                 if (distanceTL > 0 || distanceBR > 0)
-                    this.undoStack.push(new SetFigureSize(this.figures.selected, this.startResizeSize, endResizeSize));
-                delete this.figures.selected.selectedGrabPoint;
-                this.figures.selected.calculateGrabPoints();
+                    this.undoStack.push(new SetFigureSize(this.selectedFigure, this.startResizeSize, endResizeSize));
+                delete this.selectedFigure.selectedGrabPoint;
+                this.selectedFigure.calculateGrabPoints();
             }
         }
     }
@@ -185,16 +162,15 @@ class Canvas {
     render() {
         this.context.clearRect(0, 0, this.width, this.height);
 
-        for (let figure of this.figures)
-            figure.draw(this);
+        this.figures.draw(this);
 
-        if (this.figures.selected) { //draw bounding box
+        if (this.selectedFigure) { //draw bounding box
             this.context.strokeStyle = '#aa4400';
             this.context.fillStyle = '#aa4400';
             this.context.lineWidth = 2;
-            this.context.strokeRect(this.figures.selected.position.x, this.figures.selected.position.y, this.figures.selected.width, this.figures.selected.height);
-            for (let grabPoint in this.figures.selected.grabPoints) { // draw every grab point
-                let pos = this.figures.selected.grabPoints[grabPoint].position;
+            this.context.strokeRect(this.selectedFigure.position.x, this.selectedFigure.position.y, this.selectedFigure.width, this.selectedFigure.height);
+            for (let grabPoint in this.selectedFigure.grabPoints) { // draw every grab point
+                let pos = this.selectedFigure.grabPoints[grabPoint].position;
                 this.context.beginPath();
                 this.context.ellipse(pos.x, pos.y, this.grabPointSize / 2, this.grabPointSize / 2, 0, Math.PI * 2, 0);
                 this.context.fill();

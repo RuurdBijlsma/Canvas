@@ -29,21 +29,48 @@ class FileReader {
     }
 
     static groupify(result) {
-        let initialGroup = { tabs: -1, children: [] },
-            lastGroup = initialGroup;
+        let initialGroup = new Group();
+        initialGroup.tabs = -1;
+        let lastGroup = initialGroup;
         for (let object of result) {
             if (object.tabs <= lastGroup.tabs)
                 lastGroup = lastGroup.parent;
 
             if (object.type === 'group') {
-                let newGroup = { tabs: object.tabs, children: [], parent: lastGroup };
+                let newGroup = new Group(lastGroup);
+                newGroup.tabs = object.tabs;
                 lastGroup.children.push(newGroup);
                 lastGroup = newGroup;
             } else {
-                object.parent = lastGroup;
-                lastGroup.children.push(object);
+                let x = parseInt(object.config[0]),
+                    y = parseInt(object.config[1]),
+                    w = parseInt(object.config[2]),
+                    h = parseInt(object.config[3]);
+                switch (object.type) {
+                    case 'ellipse':
+                        object = new Ellipsis(lastGroup, new Vector2(x, y), w, h);
+                        break;
+                    case 'rectangle':
+                        object = new Rectangle(lastGroup, new Vector2(x, y), w, h); //vraag: moet de toegevoegde rectangles via IO ook in de undostack komen
+                        break;
+                }
+                object.tabs = object.tabs;
+                if (object instanceof Figure) //geen ornaments enzo nog
+                    lastGroup.children.push(object);
             }
         }
-        return initialGroup;
+        FileReader.removeTabs(initialGroup);
+
+        if (initialGroup.children[0] instanceof Group && initialGroup.children.length === 1)
+            return initialGroup.children[0];
+        else
+            return initialGroup;
+    }
+    static removeTabs(group) {
+        for (let child of group.children) {
+            delete child.tabs;
+            if (child instanceof Group)
+                FileReader.removeTabs(child);
+        }
     }
 }

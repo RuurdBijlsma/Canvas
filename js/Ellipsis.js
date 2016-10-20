@@ -1,6 +1,6 @@
 class Ellipsis extends Figure {
-    constructor(position, width, height, color = 'black', zIndex = 0) {
-        super(position, width, height, color, zIndex);
+    constructor(parent, position, width, height, color = 'black', zIndex = 0) {
+        super(parent, position, width, height, color, zIndex);
     }
     draw(canvas) {
         super.draw(canvas);
@@ -17,6 +17,6 @@ class Ellipsis extends Figure {
             b = Math.pow(sina * (position.x - this.position.x - this.width / 2) + cosa * (position.y - this.position.y - this.height / 2), 2),
             ellipse = (a / dd) + (b / DD);
 
-        return ellipse <= 1;
+        return ellipse <= 1 ? this : false;
     }
 }

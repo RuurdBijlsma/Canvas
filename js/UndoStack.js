@@ -1,5 +1,5 @@
 class UndoStack extends Array {
-    constructor(...figures) {
+    constructor() {
         super();
         this.index = 0;
     }

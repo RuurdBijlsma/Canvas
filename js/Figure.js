@@ -1,17 +1,15 @@
 class Figure {
-    constructor(position, width, height, color, zIndex) {
+    constructor(parent, position, width, height, color, zIndex) {
         this.position = position;
         this.width = width;
         this.height = height;
         this.color = color;
+        this.parent = parent;
 
         this.calculateGrabPoints();
 
         this.zIndexUpdated = function() {};
         this.zIndex = zIndex;
-    }
-    commitMove(position) {
-        //command endposition
     }
     setSize(pointA, pointB) {
         let xs = [pointA.x, pointB.x].sort((a, b) => a - b),
@@ -23,17 +21,6 @@ class Figure {
         this.position = pointA;
         this.width = pointB.x - pointA.x;
         this.height = pointB.y - pointA.y;
-    }
-    commitResize(corner1, corner2) {
-
-    }
-    set width(val) {
-        if (val < 0)
-            val = 0;
-        this._width = val;
-    }
-    get width() {
-        return this._width;
     }
     get cornerPoints() {
         return {
@@ -149,11 +136,10 @@ class Figure {
                     if (mousePos.x >= figure.position.x + figure.width) {
                         figure.selectedGrabPoint = figure.grabPoints.bottomRight;
                         figure.setSize(new Vector2(figure.cornerPoints.bottomRight.x, mousePos.y), figure.cornerPoints.topRight);
-                    } else if (mousePos.y <= figure.position.y){
+                    } else if (mousePos.y <= figure.position.y) {
                         figure.selectedGrabPoint = figure.grabPoints.topLeft;
                         figure.setSize(new Vector2(mousePos.x, figure.cornerPoints.topLeft.y), figure.cornerPoints.topRight);
-                    }
-                    else {
+                    } else {
                         figure.setSize(mousePos.clone(), figure.cornerPoints.topRight);
                     }
                 }
@@ -181,7 +167,7 @@ class Figure {
         canvas.context.fillStyle = this.color;
     }
     isInFigure(position) {
-        return position.x >= this.position.x && position.x <= this.position.x + this.width && position.y >= this.position.y && position.y <= this.position.y + this.height;
+        return position.x >= this.position.x && position.x <= this.position.x + this.width && position.y >= this.position.y && position.y <= this.position.y + this.height ? this : false;;
     }
     set zIndex(val) {
         this._zIndex = val;

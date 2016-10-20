@@ -9,7 +9,6 @@ class FigureCollection extends Array {
         }
 
         this.sort();
-        this.selected = null;
     }
     sort() {
         super.sort((a, b) => a.zIndex > b.zIndex);
@@ -24,15 +23,11 @@ class FigureCollection extends Array {
         }
         this.sort();
     }
-    splice(startIndex, amount) {
-        super.splice(startIndex, amount);
-    }
-    getFigure(position) {
-        for (let i = this.length - 1; i >= 0; i--) {
-            if (this[i].isInFigure(position))
-                return this[i];
-        }
-        return null;
+    splice(startIndex, amount, newItem) {
+        if(newItem)
+            super.splice(startIndex, amount, newItem);
+        else
+            super.splice(startIndex, amount);
     }
     remove(figure) {
         let index = this.indexOf(figure);
