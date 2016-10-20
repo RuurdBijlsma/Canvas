@@ -45,13 +45,14 @@ class FileReader {
                 let x = parseInt(object.config[0]),
                     y = parseInt(object.config[1]),
                     w = parseInt(object.config[2]),
-                    h = parseInt(object.config[3]);
+                    h = parseInt(object.config[3]),
+                    color = '#' + (0x1000000 + (Math.random()) * 0xffffff).toString(16).substr(1, 6);
                 switch (object.type) {
                     case 'ellipse':
-                        object = new Ellipsis(lastGroup, new Vector2(x, y), w, h);
+                        object = new Ellipsis(lastGroup, new Vector2(x, y), w, h, color);
                         break;
                     case 'rectangle':
-                        object = new Rectangle(lastGroup, new Vector2(x, y), w, h); //vraag: moet de toegevoegde rectangles via IO ook in de undostack komen
+                        object = new Rectangle(lastGroup, new Vector2(x, y), w, h, color); //vraag: moet de toegevoegde rectangles via IO ook in de undostack komen
                         break;
                 }
                 object.tabs = object.tabs;
