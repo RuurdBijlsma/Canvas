@@ -8,9 +8,33 @@ class Figure {
 
         this.calculateGrabPoints();
 
+        this.id = Figure.figureAmount++;
+
         this.zIndexUpdated = function() {};
         this.zIndex = zIndex;
     }
+
+    drawBoundingBox(canvas) {
+        let boundingColor = 'maroon';
+        canvas.context.strokeStyle = boundingColor;
+        canvas.context.fillStyle = boundingColor;
+        canvas.context.lineWidth = 2;
+        canvas.context.strokeRect(this.position.x, this.position.y, this.width, this.height);
+        for (let grabPoint in this.grabPoints) { // draw every grab point
+            let pos = this.grabPoints[grabPoint].position;
+            canvas.context.beginPath();
+            canvas.context.ellipse(pos.x, pos.y, canvas.grabPointSize / 2, canvas.grabPointSize / 2, 0, Math.PI * 2, 0);
+            canvas.context.fill();
+        }
+    }
+
+    static set figureAmount(n) { this._figureAmount = n; };
+    static get figureAmount() {
+        if (!this._figureAmount)
+            this._figureAmount = 0;
+        return this._figureAmount;
+    };
+
     setSize(pointA, pointB) {
         let xs = [pointA.x, pointB.x].sort((a, b) => a - b),
             ys = [pointA.y, pointB.y].sort((a, b) => a - b);
@@ -175,5 +199,8 @@ class Figure {
     }
     get zIndex() {
         return this._zIndex;
+    }
+    toHTML() {
+        return `<item id='${this.id}' onclick='CANVAS.selectById(${this.id})'>${this.constructor.name}</item>`;
     }
 }

@@ -6,6 +6,7 @@ class Canvas {
         this.ratio = 16 / 9;
         this.width = 1000;
         this.height = 1000;
+        this.grabPointSize = 10;
 
         this.setCanvasSize();
         let canvas = this;
@@ -13,16 +14,21 @@ class Canvas {
             canvas.setCanvasSize();
         }, false);
 
-        this.figures = new Group();
+
         this.undoStack = new UndoStack();
 
-        FileReader.load('IO.txt').then(group => CANVAS.figures = group);
+        this.figures = new Group();
+        FileReader.load('IO.txt').then(function(group) {
+            canvas.figures = group;
+            canvas.figures.domElement = document.getElementById('figure-list');
+        });
 
         this.mouseInfo = {
             position: new Vector2(),
             startPos: new Vector2(),
             mouseDown: false
         };
+
         document.addEventListener('mousedown', function(e) {
             canvas.handleMouseDown();
         }, false);
@@ -34,7 +40,6 @@ class Canvas {
                 y = e.pageY - canvas.element.offsetTop;
             canvas.handleMove(x, y);
         }, false);
-
         document.addEventListener('touchstart', function(e) {
             let x = e.touches[0].pageX - canvas.element.offsetLeft,
                 y = e.touches[0].pageY - canvas.element.offsetTop;
@@ -51,9 +56,6 @@ class Canvas {
 
             canvas.handleMove(x, y);
         }, false);
-
-        this.grabPointSize = 10;
-
         document.addEventListener('keydown', function(e) {
             canvas.handleKeyDown(e);
         });
@@ -61,20 +63,35 @@ class Canvas {
         this.render();
     }
 
+    set selectedFigure(figure) {
+        this._selectedFigure = figure;
+        this.selectById(figure.id);
+    }
+    get selectedFigure() {
+        return this._selectedFigure
+    };
+
+    selectById(id) {
+        this._selectedFigure = this.figures.findById(id);
+        let items = document.querySelectorAll('item, group-name');
+        for (let item of items) {
+            item.removeAttribute('selected');
+            if (item.id == id)
+                item.setAttribute('selected', '');
+        }
+    }
+
     handleKeyDown(e) {
         if (e.key === 'z' && e.ctrlKey)
             this.undoStack.undo();
-        if (e.key === 'y' && e.ctrlKey) {
-            e.preventDefault();
+        if (e.key === 'y' && e.ctrlKey)
             this.undoStack.redo();
-        }
-        if (e.key === 'Delete') {
-            if (this.selectedFigure) {
-                let removal = new RemoveFigure(this.selectedFigure);
-                this.undoStack.push(removal);
-                removal.execute();
-                this.selectedFigure = undefined;
-            }
+
+        if (e.key === 'Delete' && this.selectedFigure) {
+            let removal = new RemoveFigure(this.selectedFigure);
+            this.undoStack.push(removal);
+            removal.execute();
+            this.selectedFigure = undefined;
         }
     }
 
@@ -84,13 +101,21 @@ class Canvas {
         if (!this.selectedFigure)
             this.selectedFigure = this.figures.getFigure(this.mouseInfo.position);
         if (this.selectedFigure) {
-            for (let grabPoint in this.selectedFigure.grabPoints)
-                if (this.selectedFigure.grabPoints[grabPoint].position.distanceTo(this.mouseInfo.position) < this.grabPointSize) {
-                    this.selectedFigure.selectedGrabPoint = this.selectedFigure.grabPoints[grabPoint];
-                    console.log('startresize');
-                    this.startResizeSize = [this.selectedFigure.cornerPoints.topLeft, this.selectedFigure.cornerPoints.bottomRight];
-                    break;
+            let closest = Infinity,
+                bestGrabber;
+            for (let grabPoint in this.selectedFigure.grabPoints) {
+                let distance = this.selectedFigure.grabPoints[grabPoint].position.distanceTo(this.mouseInfo.position);
+                if (distance < closest) {
+                    closest = distance;
+                    bestGrabber = this.selectedFigure.grabPoints[grabPoint];
                 }
+            }
+
+            if (bestGrabber && closest <= this.grabPointSize) {
+                this.selectedFigure.selectedGrabPoint = bestGrabber;
+                console.log('startresize');
+                this.startResizeSize = [this.selectedFigure.cornerPoints.topLeft, this.selectedFigure.cornerPoints.bottomRight];
+            }
 
             if (!this.selectedFigure.selectedGrabPoint)
                 if (this.selectedFigure.isInFigure(this.mouseInfo.position)) {
@@ -148,13 +173,15 @@ class Canvas {
                 this.selectedFigure.calculateGrabPoints();
             } else {
                 console.log('endresize');
-                let endResizeSize = [this.selectedFigure.cornerPoints.topLeft, this.selectedFigure.cornerPoints.bottomRight],
-                    distanceTL = this.startResizeSize[0].distanceTo(endResizeSize[0]),
-                    distanceBR = this.startResizeSize[1].distanceTo(endResizeSize[1]);
-                if (distanceTL > 0 || distanceBR > 0)
-                    this.undoStack.push(new SetFigureSize(this.selectedFigure, this.startResizeSize, endResizeSize));
-                delete this.selectedFigure.selectedGrabPoint;
-                this.selectedFigure.calculateGrabPoints();
+                if (this.startResizeSize) {
+                    let endResizeSize = [this.selectedFigure.cornerPoints.topLeft, this.selectedFigure.cornerPoints.bottomRight],
+                        distanceTL = this.startResizeSize[0].distanceTo(endResizeSize[0]),
+                        distanceBR = this.startResizeSize[1].distanceTo(endResizeSize[1]);
+                    if (distanceTL > 0 || distanceBR > 0)
+                        this.undoStack.push(new SetFigureSize(this.selectedFigure, this.startResizeSize, endResizeSize));
+                    delete this.selectedFigure.selectedGrabPoint;
+                    this.selectedFigure.calculateGrabPoints();
+                }
             }
         }
     }
@@ -164,18 +191,7 @@ class Canvas {
 
         this.figures.draw(this);
 
-        if (this.selectedFigure) { //draw bounding box
-            this.context.strokeStyle = '#aa4400';
-            this.context.fillStyle = '#aa4400';
-            this.context.lineWidth = 2;
-            this.context.strokeRect(this.selectedFigure.position.x, this.selectedFigure.position.y, this.selectedFigure.width, this.selectedFigure.height);
-            for (let grabPoint in this.selectedFigure.grabPoints) { // draw every grab point
-                let pos = this.selectedFigure.grabPoints[grabPoint].position;
-                this.context.beginPath();
-                this.context.ellipse(pos.x, pos.y, this.grabPointSize / 2, this.grabPointSize / 2, 0, Math.PI * 2, 0);
-                this.context.fill();
-            }
-        }
+        if (this.selectedFigure) this.selectedFigure.drawBoundingBox(this);
 
         let canvas = this;
         requestAnimationFrame(function() {

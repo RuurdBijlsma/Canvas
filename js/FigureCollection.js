@@ -4,14 +4,17 @@ class FigureCollection extends Array {
 
         for (let figure of figures) {
             super.push(figure);
-            if(figure instanceof Figure)
+            if (figure instanceof Figure)
                 figure.zIndexUpdated = () => this.sort();
         }
+
+        this.onChange = function() {};
 
         this.sort();
     }
     sort() {
         super.sort((a, b) => a.zIndex > b.zIndex);
+        this.onChange();
     }
     push(...figures) {
         for (let figure of figures) {
@@ -24,13 +27,15 @@ class FigureCollection extends Array {
         this.sort();
     }
     splice(startIndex, amount, newItem) {
-        if(newItem)
+        if (newItem)
             super.splice(startIndex, amount, newItem);
         else
             super.splice(startIndex, amount);
+        this.onChange();
     }
     remove(figure) {
         let index = this.indexOf(figure);
         index !== -1 && super.splice(index, 1);
+        this.onChange();
     }
 }

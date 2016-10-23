@@ -23,6 +23,49 @@ body {
     height: 100%;
 }
 
+#right-menu {
+    width: 300px;
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    height: calc(100% - 40px);
+    background-color: rgb(10, 10, 10);
+    padding: 20px;
+}
+#figure-list {
+    height: calc(100% - 300px);
+}
+#figure-info{
+    height: 300px;
+}
+
+item,
+group-name,
+group-items {
+    display: block;
+}
+
+group-items {
+    transform: translateX(20px);
+}
+
+item,
+group-name {
+    padding: 3px;
+    color: white;
+    cursor: pointer;
+}
+
+item:hover,
+group-name:hover {
+    color: #fffca6;
+}
+
+item[selected],
+group-name[selected] {
+    color: #e3c012;
+}
+
 #renderer {
     background-color: white;
     width: 1000px;
