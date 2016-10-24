@@ -9,22 +9,24 @@ class Vector2 {
     clone() {
         return new Vector2(this.x, this.y);
     }
-    sub(vector) {
-        let figure = this.clone();
-        figure.x -= vector.x;
-        figure.y -= vector.y;
-        return figure;
+    sub(vector, y) {
+        if (y) {
+            this.x -= vector;
+            this.y -= y;
+        } else {
+            this.x -= vector.x;
+            this.y -= vector.y;
+        }
+        return this;
     }
-    add(vector) {
-        let figure = this.clone();
-        figure.x += vector.x;
-        figure.y += vector.y;
-        return figure;
-    }
-    add(x, y) {
-        let figure = this.clone();
-        figure.x += x;
-        figure.y += y;
-        return figure;
+    add(vector, y) {
+        if (y === 0 || y) {
+            this.x += vector;
+            this.y += y;
+        } else {
+            this.x += vector.x;
+            this.y += vector.y;
+        }
+        return this;
     }
 }

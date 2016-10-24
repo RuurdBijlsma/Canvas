@@ -1,3 +1,9 @@
+//retard bug
+//selectie zindex is omgekeerd van draw zindex
+//redo stuk
+//
+//onfixbare bug:
+//Als je group resized van grabpoint naar andere grabpoint doet ie dom
 class Canvas {
     constructor(element) {
         this.element = element;
@@ -65,7 +71,7 @@ class Canvas {
 
     set selectedFigure(figure) {
         this._selectedFigure = figure;
-        this.selectById(figure.id);
+        if (figure) this.selectById(figure.id);
     }
     get selectedFigure() {
         return this._selectedFigure
@@ -73,6 +79,7 @@ class Canvas {
 
     selectById(id) {
         this._selectedFigure = this.figures.findById(id);
+        if (this.selectedFigure) this._selectedFigure.calculateGrabPoints();
         let items = document.querySelectorAll('item, group-name');
         for (let item of items) {
             item.removeAttribute('selected');
@@ -99,7 +106,7 @@ class Canvas {
         this.mouseInfo.mouseDown = true;
 
         if (!this.selectedFigure)
-            this.selectedFigure = this.figures.getFigure(this.mouseInfo.position);
+            this.selectedFigure = this.figures.getFigure(this.mouseInfo.position.x, this.mouseInfo.position.y);
         if (this.selectedFigure) {
             let closest = Infinity,
                 bestGrabber;
@@ -118,13 +125,13 @@ class Canvas {
             }
 
             if (!this.selectedFigure.selectedGrabPoint)
-                if (this.selectedFigure.isInFigure(this.mouseInfo.position)) {
+                if (this.selectedFigure.isInFigure(this.mouseInfo.position.x, this.mouseInfo.position.y)) {
                     console.log('startmove');
                     this.movePoint = this.mouseInfo.position.clone().sub(this.selectedFigure.position);
-                    this.startMovePosition = this.selectedFigure.position.clone();
+                    this.startMovePosition = this.selectedFigure.position;
                 }
             if (!this.selectedFigure.selectedGrabPoint && !this.movePoint) {
-                this.selectedFigure = this.figures.getFigure(this.mouseInfo.position);
+                this.selectedFigure = this.figures.getFigure(this.mouseInfo.position.x, this.mouseInfo.position.y);
             }
         }
     }
@@ -134,14 +141,13 @@ class Canvas {
         this.mouseInfo.position.y = y;
         let cursorSet = false;
 
-        if (this.figures.getFigure(this.mouseInfo.position)) {
+        if (this.figures.getFigure(this.mouseInfo.position.x, this.mouseInfo.position.y)) {
             this.setCursor('move');
             cursorSet = true;
         }
 
         if (this.selectedFigure && this.selectedFigure.selectedGrabPoint) {
             this.selectedFigure.selectedGrabPoint.action(this.mouseInfo.position);
-            this.selectedFigure.calculateGrabPoints();
             cursorSet = true;
         } else if (this.selectedFigure) {
             for (let grabPoint in this.selectedFigure.grabPoints)
@@ -152,9 +158,8 @@ class Canvas {
         }
 
         if (this.movePoint) {
-            this.selectedFigure.position.x = this.mouseInfo.position.x - this.movePoint.x;
-            this.selectedFigure.position.y = this.mouseInfo.position.y - this.movePoint.y;
-            this.selectedFigure.calculateGrabPoints();
+            this.selectedFigure.x = this.mouseInfo.position.x - this.movePoint.x;
+            this.selectedFigure.y = this.mouseInfo.position.y - this.movePoint.y;
         }
 
         if (!cursorSet)
@@ -170,7 +175,6 @@ class Canvas {
                 console.log('endmove', this.startMovePosition.distanceTo(this.selectedFigure.position));
                 if (this.startMovePosition.distanceTo(this.selectedFigure.position) > 0)
                     this.undoStack.push(new SetFigurePosition(this.selectedFigure, this.startMovePosition, this.selectedFigure.position));
-                this.selectedFigure.calculateGrabPoints();
             } else {
                 console.log('endresize');
                 if (this.startResizeSize) {
@@ -180,7 +184,6 @@ class Canvas {
                     if (distanceTL > 0 || distanceBR > 0)
                         this.undoStack.push(new SetFigureSize(this.selectedFigure, this.startResizeSize, endResizeSize));
                     delete this.selectedFigure.selectedGrabPoint;
-                    this.selectedFigure.calculateGrabPoints();
                 }
             }
         }

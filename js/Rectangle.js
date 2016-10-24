@@ -1,9 +1,9 @@
 class Rectangle extends Figure {
-    constructor(parent, position, width, height, color = 'black', zIndex = 0) {
-        super(parent, position, width, height, color, zIndex);
+    constructor(parent, x, y, width, height, color = 'black', zIndex = 0) {
+        super(parent, x, y, width, height, color, zIndex);
     }
     draw(canvas) {
         super.draw(canvas);
-        canvas.context.fillRect(this.position.x, this.position.y, this.width, this.height);
+        canvas.context.fillRect(this.x, this.y, this.width, this.height);
     }
 }

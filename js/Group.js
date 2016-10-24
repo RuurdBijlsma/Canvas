@@ -35,32 +35,74 @@ class Group extends Figure {
         }
     }
 
-    get position() {
-        return this.cornerPoints.topLeft;
+    get x() {
+        return this.cornerPoints.topLeft.x;
     }
-    set position(v) {}
+    get y() {
+        return this.cornerPoints.topLeft.y;
+    }
+    set x(newX) {
+        let added = newX - this.x;
+        if (this.children)
+            for (let child of this.children) {
+                child.x += added;
+            }
+        this.calculateGrabPoints();
+    }
+    set y(newY) {
+        let added = newY - this.y;
+        if (this.children)
+            for (let child of this.children) {
+                child.y += added;
+            }
+        this.calculateGrabPoints();
+    }
     get height() {
-        let points = this.cornerPoints;
-        return Math.abs(points.topLeft.y - points.bottomRight.y);
+        let points = this.cornerPoints,
+            height = Math.abs(points.topLeft.y - points.bottomRight.y);
+        return height;
     }
     get width() {
-        let points = this.cornerPoints;
-        return Math.abs(points.topLeft.x - points.bottomRight.x);
+        let points = this.cornerPoints,
+            width = Math.abs(points.topLeft.x - points.bottomRight.x);
+        return width;
     }
-    set height(v) {}
-    set width(v) {}
+    set height(newHeight) {
+        if (this.children) {
+            let factor = newHeight / this.height;
+            for (let child of this.children) {
+                newHeight = child.height * factor;
+                child.height = newHeight > 0 ? newHeight : child.height;
+                let deltaPos = (child.y - this.y) * (factor - 1);
+                child.y += deltaPos;
+            }
+        }
+        this.calculateGrabPoints();
+    }
+    set width(newWidth) {
+        if (this.children) {
+            let factor = newWidth / this.width;
+            for (let child of this.children) {
+                newWidth = child.width * factor;
+                child.width = newWidth > 0 ? newWidth : child.width;
+                let deltaPos = (child.x - this.x) * (factor - 1);
+                child.x += deltaPos;
+            }
+        }
+        this.calculateGrabPoints();
+    }
 
-    isInFigure(position) {
-        return this.getFigure(position);
+    isInFigure(x, y) {
+        return this.getFigure(x, y);
     }
     draw(canvas) {
         for (let figure of this.children)
             if (figure.draw)
                 figure.draw(canvas);
     }
-    getFigure(position) {
+    getFigure(x, y) {
         for (let figure of this.children) {
-            let selected = figure.isInFigure(position);
+            let selected = figure.isInFigure(x, y);
             if (selected)
                 return selected;
         }

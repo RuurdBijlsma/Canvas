@@ -10,7 +10,7 @@ class AddRectangle extends Command {
         this.zIndex = zIndex;
     }
     execute() {
-        this.rectangle = new Rectangle(new Vector2(this.x, this.y), this.w, this.h, this.color, this.zIndex);
+        this.rectangle = new Rectangle(this.x, this.y, this.w, this.h, this.color, this.zIndex);
         this.parent.children.push(this.rectangle);
     }
     undo(){

@@ -10,7 +10,7 @@ class AddEllipsis extends Command {
         this.zIndex = zIndex;
     }
     execute() {
-        this.ellipsis = new Ellipsis(new Vector2(this.x, this.y), this.w, this.h, this.color, this.zIndex);
+        this.ellipsis = new Ellipsis(this.x, this.y, this.w, this.h, this.color, this.zIndex);
         this.parent.children.push(this.ellipsis);
     }
     undo(){

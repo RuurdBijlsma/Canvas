@@ -6,11 +6,11 @@ class SetFigurePosition extends Command{
         this.oldPos = oldPos.clone();
     }
     execute() {
-    	this.figure.position = this.newPos.clone();
-        this.figure.calculateGrabPoints();
+        this.figure.x = this.newPos.x;
+        this.figure.y = this.newPos.y;
     }
     undo(){
-    	this.figure.position = this.oldPos.clone();
-        this.figure.calculateGrabPoints();
+        this.figure.x = this.oldPos.x;
+        this.figure.y = this.oldPos.y;
     }
 }

@@ -9,10 +9,8 @@ class SetFigureSize extends Command{
     }
     execute() {
         this.figure.setSize(this.newPointA.clone(), this.newPointB.clone());
-        this.figure.calculateGrabPoints();
     }
     undo(){
         this.figure.setSize(this.newPointA.clone(), this.newPointB.clone());
-        this.figure.calculateGrabPoints();
     }
 }
