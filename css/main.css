@@ -34,11 +34,8 @@ body {
 }
 
 #figure-list {
-    height: calc(100% - 300px);
-}
-
-#figure-info {
-    height: 300px;
+    height: calc(100% - 180px);
+    overflow-y: scroll;
 }
 
 item,
@@ -49,6 +46,10 @@ group-items {
 
 group-items {
     transform: translateX(20px);
+}
+
+group {
+    display: block;
 }
 
 item,
@@ -68,12 +69,14 @@ group-name[selected] {
     color: #e3c012;
 }
 
-#figure-info>h4 {
-    color: white;
+#figure-info {
+    height: 180px;
+    width: calc(100% + 5px);
+    display: none;
 }
 
-#figure-info {
-    display: none;
+#figure-info>h4 {
+    color: white;
 }
 
 #figure-info>input[type=button] {
@@ -116,6 +119,7 @@ label,
     width: calc(100% - 23px);
     display: inline-block;
 }
+
 #zIndex {
     width: calc(100% - 61px) !important;
 }
@@ -138,15 +142,15 @@ label,
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.20);
+    background-color: rgba(255, 255, 255, 0.20);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(255, 255, 255, 0.3);
 }
 
 ::-webkit-scrollbar-thumb:active {
-    background-color: rgba(0, 0, 0, 0.60);
+    background-color: rgba(255, 255, 255, 0.60);
 }
 
 *:focus {

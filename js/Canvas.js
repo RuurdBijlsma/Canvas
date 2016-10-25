@@ -1,5 +1,3 @@
-//redo stuk
-//
 //onfixbare bug:
 //Als je group resized van grabpoint naar andere grabpoint doet ie dom
 class Canvas {
@@ -44,9 +42,10 @@ class Canvas {
         rightMenu.addEventListener('mousedown', e => e.stopPropagation());
         rightMenu.addEventListener('touchstart', e => e.stopPropagation());
 
+        document.addEventListener('contextmenu', e => e.preventDefault());
         document.addEventListener('keydown', e => this.handleKeyDown(e));
         document.addEventListener('mousedown', () => this.handleMouseDown());
-        document.addEventListener('mouseup', () => this.handleMouseUp());
+        document.addEventListener('mouseup', e => this.handleMouseUp(e));
         document.addEventListener('mousemove', e => this.handleMove(e.pageX - this.element.offsetLeft, e.pageY - this.element.offsetTop));
         document.addEventListener('touchend', () => this.handleMouseUp());
         document.addEventListener('touchmove', e => this.handleMove(e.touches[0].pageX - this.element.offsetLeft, e.touches[0].pageY - this.element.offsetTop));
@@ -190,10 +189,60 @@ class Canvas {
         this.displayFigureInfo(this.selectedFigure);
     }
 
+    addToGroup(e) {
+        if (this.dragging) {
+            e.stopPropagation();
+            let figure = this.figures.findById(this.dragging.id),
+                newParent = this.figures.findById(e.target.id);
+            if (this.dragging.clone.parentElement)
+                this.dragging.clone.parentElement.removeChild(this.dragging.clone);
+            if (figure && newParent && figure.parent !== newParent) {
+                console.log('executing order', figure.parent.id, newParent.id);
+                if (this.dragging.original.parentElement)
+                    this.dragging.original.parentElement.removeChild(this.dragging.original);
+                let moveOrder = new MoveFigureOrder(figure, newParent);
+                moveOrder.execute();
+                this.undoStack.push(moveOrder);
+            } else {
+                this.dragging.original.style.opacity = 1;
+                this.dragging.original.style.pointerEvents = 'all';
+            }
+        }
+    }
+
+    startDragging(e) {
+        if (e.which === 3) {
+            let x = e.pageX - this.element.offsetLeft,
+                y = e.pageY - this.element.offsetTop;
+            e.stopPropagation();
+            let targetElement = e.target;
+            if (targetElement.tagName === 'GROUP-NAME')
+                targetElement = targetElement.parentElement;
+            this.dragging = {
+                id: e.target.id,
+                original: targetElement,
+                clone: targetElement.cloneNode()
+            }
+            this.dragging.clone.style.position = 'fixed';
+            this.dragging.clone.style.pointerEvents = 'none';
+            this.dragging.clone.innerHTML = this.dragging.original.innerHTML;
+            this.dragging.clone.style.top = y;
+            this.dragging.clone.style.left = x;
+            this.dragging.original.style.opacity = 0;
+            this.dragging.original.style.pointerEvents = 'none';
+            document.body.appendChild(this.dragging.clone);
+        }
+    }
+
     handleMove(x, y) {
         this.mouseInfo.position.x = x;
         this.mouseInfo.position.y = y;
         let cursorSet = false;
+
+        if (this.dragging) {
+            this.dragging.clone.style.top = y;
+            this.dragging.clone.style.left = x;
+        }
 
         if (this.figures.getFigure(this.mouseInfo.position.x, this.mouseInfo.position.y)) {
             this.setCursor('move');
@@ -222,7 +271,14 @@ class Canvas {
             this.setCursor('default');
     }
 
-    handleMouseUp() {
+    handleMouseUp(e) {
+        if (this.dragging) {
+            if (this.dragging.clone.parentElement)
+                this.dragging.clone.parentElement.removeChild(this.dragging.clone);
+            this.dragging.original.style.opacity = 1;
+            this.dragging.original.style.pointerEvents = 'all';
+        }
+        delete this.dragging;
         this.mouseInfo.mouseDown = false;
 
         if (this.selectedFigure) {
@@ -286,6 +342,7 @@ class Canvas {
     }
 
     setCanvasSize() {
+        this.ratio = window.innerWidth / window.innerHeight;
         this.context.clearRect(0, 0, this.width, this.height);
 
         let windowWidth = window.innerWidth,

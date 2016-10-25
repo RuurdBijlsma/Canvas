@@ -122,16 +122,8 @@ class Group extends Figure {
                 CANVAS.selectById(CANVAS.selectedFigure.id);
         }
     }
-    toHTML() {
-        let result = `<group><group-name onclick='CANVAS.selectById(${this.id})' id='${this.id}'>Group</group-name><group-items>`;
-        for (let item of this.children)
-            result += item.toHTML();
-
-        result += `</group-items>
-        </group>`;
-        return result;
-    }
     findById(id) {
+        id = parseInt(id);
         if (id === this.id)
             return this;
         for (let child of this.children) {
@@ -143,5 +135,32 @@ class Group extends Figure {
             }
         }
         return undefined;
+    }
+    remove(figure) {
+        this.children.remove(figure);
+        for (let child of this.children)
+            if (child instanceof Group)
+                child.remove(figure);
+    }
+    toHTML() {
+        let result = `<group onmousedown='CANVAS.startDragging(event)'><group-name onclick='CANVAS.selectById(${this.id})' onmouseup='CANVAS.addToGroup(event)' id='${this.id}'>Group</group-name><group-items>`;
+        for (let item of this.children)
+            result += item.toHTML();
+
+        result += `</group-items>
+        </group>`;
+        return result;
+    }
+    toString(tabs = 0) {
+        let result = '';
+        for (let i = 0; i < tabs; i++)
+            result += '\t';
+
+        result += `group ${this.children.filter(child=>!(child instanceof Group)).length}\n`;
+        
+        for (let child of this.children)
+            result += child.toString(tabs + 1);
+
+        return result;
     }
 }

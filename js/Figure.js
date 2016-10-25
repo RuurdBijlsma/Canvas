@@ -244,7 +244,15 @@ class Figure {
     }
 
     toHTML() {
-        return `<item id='${this.id}' onclick='CANVAS.selectById(${this.id})'>${this.constructor.name}</item>`;
+        return `<item id='${this.id}' onclick='CANVAS.selectById(${this.id})' onmousedown='CANVAS.startDragging(event)'>${this.constructor.name}</item>`;
+    }
+
+    toString(tabs = 0) {
+        let result = '';
+        for (let i = 0; i < tabs; i++)
+            result += '\t';
+
+        return result + `${this.constructor.name} ${this.x} ${this.y} ${this.width} ${this.height}\n`;
     }
 
 }
