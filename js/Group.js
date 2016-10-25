@@ -101,8 +101,8 @@ class Group extends Figure {
                 figure.draw(canvas);
     }
     getFigure(x, y) {
-        for (let figure of this.children) {
-            let selected = figure.isInFigure(x, y);
+        for(let i=this.children.length-1;i>=0;i--){
+            let selected = this.children[i].isInFigure(x, y);
             if (selected)
                 return selected;
         }

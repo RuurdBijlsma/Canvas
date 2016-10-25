@@ -32,10 +32,12 @@ body {
     background-color: rgb(10, 10, 10);
     padding: 20px;
 }
+
 #figure-list {
     height: calc(100% - 300px);
 }
-#figure-info{
+
+#figure-info {
     height: 300px;
 }
 
@@ -64,6 +66,55 @@ group-name:hover {
 item[selected],
 group-name[selected] {
     color: #e3c012;
+}
+
+#figure-info>h4 {
+    color: white;
+}
+
+#figure-info {
+    display: none;
+}
+
+#figure-info>input[type=button] {
+    width: calc(100% - 5px);
+    padding: 5px;
+    border: none;
+    border-radius: 3px;
+    background-color: white;
+    color: maroon;
+    transition: 0.1s;
+    margin-top: 10px;
+}
+
+#figure-info>input[type=button]:hover {
+    background-color: maroon;
+    color: white;
+}
+
+#properties {
+    margin-top: 10px;
+}
+
+#properties>div {
+    width: calc(50% - 2px);
+    display: inline-block;
+}
+
+label,
+#figure-info h5 {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+#properties input {
+    padding: 5px;
+    border-radius: 3px;
+    border: none;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    cursor: text;
+    width: calc(100% - 23px);
+    display: inline-block;
 }
 
 #renderer {

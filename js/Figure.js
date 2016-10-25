@@ -69,7 +69,6 @@ class Figure {
         this.y = pointA.y;
         this.width = pointB.x - pointA.x;
         this.height = pointB.y - pointA.y;
-        console.log(this.x, this.width);
     }
     get cornerPoints() {
         return {

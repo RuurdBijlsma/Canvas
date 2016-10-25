@@ -34,7 +34,22 @@
     <canvas id='renderer'></canvas>
     <div id='right-menu'>
         <div id='figure-list'></div>
-        <div id='figure-info'></div>
+        <div id='figure-info'>
+            <h4>Rectangle (ID: 4)</h4>
+            <div id='properties'>
+                <div id='position'>
+                    <h5>Position</h5>
+                    <label>X: <input type='number' placeholder='X Position' id='x'></label>
+                    <label>Y: <input type='number' placeholder='Y Position' id='y'></label>
+                </div>
+                <div id='size'>
+                    <h5>Size</h5>
+                    <label>X: <input type='number' placeholder='X Size' id='width'></label>
+                    <label>Y: <input type='number' placeholder='Y Size' id='height'></label>
+                </div>
+            </div>
+            <input type='button' value='Delete' onclick='CANVAS.deleteSelected()'>
+        </div>
     </div>
     </div>
 </body>

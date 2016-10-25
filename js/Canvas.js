@@ -1,5 +1,3 @@
-//retard bug
-//selectie zindex is omgekeerd van draw zindex
 //redo stuk
 //
 //onfixbare bug:
@@ -35,7 +33,20 @@ class Canvas {
             mouseDown: false
         };
 
-        document.addEventListener('mousedown', function(e) {
+        let rightMenu = document.getElementById('right-menu');
+        rightMenu.addEventListener('mousedown', e => e.stopPropagation());
+        rightMenu.addEventListener('touchstart', e => e.stopPropagation());
+
+        this.inputs = {
+            xPos: document.getElementById('x'),
+            yPos: document.getElementById('y'),
+            xSize: document.getElementById('width'),
+            ySize: document.getElementById('height')
+        };
+        for (let input in this.inputs)
+            this.inputs[input].addEventListener('change', e => this.handlePropertyChange(e));
+
+        document.addEventListener('mousedown', function() {
             canvas.handleMouseDown();
         }, false);
         document.addEventListener('mouseup', function() {
@@ -71,6 +82,7 @@ class Canvas {
 
     set selectedFigure(figure) {
         this._selectedFigure = figure;
+        this.displayFigureInfo(this._selectedFigure);
         if (figure) this.selectById(figure.id);
     }
     get selectedFigure() {
@@ -88,13 +100,39 @@ class Canvas {
         }
     }
 
+    displayFigureInfo(figure) {
+        let infoElement = document.getElementById('figure-info');
+        if (!figure) {
+            let items = document.querySelectorAll('item, group-name');
+            for (let item of items)
+                item.removeAttribute('selected');
+            infoElement.style.display = 'none';
+        } else {
+            infoElement.style.display = 'block';
+            this.inputs.xPos.value = this.selectedFigure.x;
+            this.inputs.yPos.value = this.selectedFigure.y;
+            this.inputs.xSize.value = this.selectedFigure.width;
+            this.inputs.ySize.value = this.selectedFigure.height;
+        }
+    }
+
+    handlePropertyChange(e) {
+        let property = e.target.id,
+            value = parseInt(e.target.value);
+        this.selectedFigure[property] = value;
+    }
+
     handleKeyDown(e) {
         if (e.key === 'z' && e.ctrlKey)
             this.undoStack.undo();
         if (e.key === 'y' && e.ctrlKey)
             this.undoStack.redo();
+        if (e.key === 'Delete')
+            this.deleteSelected();
+    }
 
-        if (e.key === 'Delete' && this.selectedFigure) {
+    deleteSelected() {
+        if (this.selectedFigure) {
             let removal = new RemoveFigure(this.selectedFigure);
             this.undoStack.push(removal);
             removal.execute();
@@ -176,14 +214,15 @@ class Canvas {
                 if (this.startMovePosition.distanceTo(this.selectedFigure.position) > 0)
                     this.undoStack.push(new SetFigurePosition(this.selectedFigure, this.startMovePosition, this.selectedFigure.position));
             } else {
-                console.log('endresize');
                 if (this.startResizeSize) {
+                    console.log('endresize');
                     let endResizeSize = [this.selectedFigure.cornerPoints.topLeft, this.selectedFigure.cornerPoints.bottomRight],
                         distanceTL = this.startResizeSize[0].distanceTo(endResizeSize[0]),
                         distanceBR = this.startResizeSize[1].distanceTo(endResizeSize[1]);
                     if (distanceTL > 0 || distanceBR > 0)
                         this.undoStack.push(new SetFigureSize(this.selectedFigure, this.startResizeSize, endResizeSize));
                     delete this.selectedFigure.selectedGrabPoint;
+                    delete this.startResizeSize;
                 }
             }
         }
