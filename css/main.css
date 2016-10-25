@@ -1,7 +1,7 @@
 * {
     margin: 0px;
     padding: 0px;
-    font-family: roboto;
+    font-family: Muli;
     font-weight: 300;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -34,7 +34,7 @@ body {
 }
 
 #figure-list {
-    height: calc(100% - 180px);
+    height: calc(100% - 220px);
     overflow-y: scroll;
 }
 
@@ -70,7 +70,7 @@ group-name[selected] {
 }
 
 #figure-info {
-    height: 180px;
+    height: 220px;
     width: calc(100% + 5px);
     display: none;
 }
@@ -80,7 +80,7 @@ group-name[selected] {
 }
 
 #figure-info>input[type=button] {
-    width: calc(100% - 5px);
+    width: calc(100% - 8px);
     padding: 5px;
     border: none;
     border-radius: 3px;
@@ -100,7 +100,7 @@ group-name[selected] {
 }
 
 #properties>div {
-    width: calc(50% - 2px);
+    width: calc(50% - 3px);
     display: inline-block;
 }
 
@@ -116,12 +116,12 @@ label,
     margin-right: 5px;
     margin-bottom: 5px;
     cursor: text;
-    width: calc(100% - 23px);
+    width: calc(100% - 25px);
     display: inline-block;
 }
 
 #zIndex {
-    width: calc(100% - 61px) !important;
+    width: calc(100% - 68px) !important;
 }
 
 #renderer {
