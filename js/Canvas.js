@@ -62,14 +62,23 @@ class Canvas {
     set selectedFigure(figure) {
         this._selectedFigure = figure;
         this.displayFigureInfo(this._selectedFigure);
-        if (figure) this.selectById(figure.id);
+        if (figure) this.selectById();
     }
     get selectedFigure() {
         return this._selectedFigure
     };
 
+    createSelection(figures) {
+        if (figures.length !== 0) {
+            let selectionGroup = new Group();
+            selectionGroup.children = selectionGroup.children.concat(figures);
+            this.selectedFigure = selectionGroup;
+        }
+    }
+
     selectById(id) {
-        this._selectedFigure = this.figures.findById(id);
+        if (id)
+            this._selectedFigure = this.figures.findById(id);
         if (this.selectedFigure) this._selectedFigure.calculateGrabPoints();
         let items = document.querySelectorAll('item, group-name');
         for (let item of items) {
@@ -157,9 +166,10 @@ class Canvas {
     handleMouseDown() {
         this.mouseInfo.mouseDown = true;
 
-        if (!this.selectedFigure)
+        if (!this.selectedFigure) {
             this.selectedFigure = this.figures.getFigure(this.mouseInfo.position.x, this.mouseInfo.position.y);
-        if (this.selectedFigure) {
+            this.setMovePoint();
+        } else {
             let closest = Infinity,
                 bestGrabber;
             for (let grabPoint in this.selectedFigure.grabPoints) {
@@ -172,21 +182,32 @@ class Canvas {
 
             if (bestGrabber && closest <= this.grabPointSize) {
                 this.selectedFigure.selectedGrabPoint = bestGrabber;
-                console.log('startresize');
                 this.startResizeSize = [this.selectedFigure.cornerPoints.topLeft, this.selectedFigure.cornerPoints.bottomRight];
             }
 
             if (!this.selectedFigure.selectedGrabPoint)
                 if (this.selectedFigure.isInFigure(this.mouseInfo.position.x, this.mouseInfo.position.y)) {
-                    console.log('startmove');
-                    this.movePoint = this.mouseInfo.position.clone().sub(this.selectedFigure.position);
-                    this.startMovePosition = this.selectedFigure.position;
+                    this.setMovePoint();
                 }
             if (!this.selectedFigure.selectedGrabPoint && !this.movePoint) {
                 this.selectedFigure = this.figures.getFigure(this.mouseInfo.position.x, this.mouseInfo.position.y);
+                this.setMovePoint();
             }
         }
         this.displayFigureInfo(this.selectedFigure);
+        if (!this.selectedFigure) {
+            this.boxSelection = {
+                startPoint: this.mouseInfo.position.clone(),
+                figure: new Rectangle(undefined, this.mouseInfo.position.x, this.mouseInfo.position.y, 0, 0, 'rgba(0, 120, 200, 0.4)', Infinity)
+            };
+        }
+    }
+
+    setMovePoint() {
+        if (this.selectedFigure) {
+            this.movePoint = this.mouseInfo.position.clone().sub(this.selectedFigure.position);
+            this.startMovePosition = this.selectedFigure.position;
+        }
     }
 
     addToGroup(e) {
@@ -197,7 +218,6 @@ class Canvas {
             if (this.dragging.clone.parentElement)
                 this.dragging.clone.parentElement.removeChild(this.dragging.clone);
             if (figure && newParent && figure.parent !== newParent) {
-                console.log('executing order', figure.parent.id, newParent.id);
                 if (this.dragging.original.parentElement)
                     this.dragging.original.parentElement.removeChild(this.dragging.original);
                 let moveOrder = new MoveFigureOrder(figure, newParent);
@@ -267,36 +287,45 @@ class Canvas {
             this.selectedFigure.y = this.mouseInfo.position.y - this.movePoint.y;
         }
 
+        if (this.boxSelection) {
+            this.boxSelection.figure.setSize(this.boxSelection.startPoint.clone(), this.mouseInfo.position);
+        }
+
         if (!cursorSet)
             this.setCursor('default');
     }
 
     handleMouseUp(e) {
-        if (this.dragging) {
-            if (this.dragging.clone.parentElement)
-                this.dragging.clone.parentElement.removeChild(this.dragging.clone);
-            this.dragging.original.style.opacity = 1;
-            this.dragging.original.style.pointerEvents = 'all';
-        }
-        delete this.dragging;
         this.mouseInfo.mouseDown = false;
+        if (this.boxSelection) {
+            let cornerPoints = this.boxSelection.figure.cornerPoints,
+                selectedFigures = this.figures.getFiguresFromSelection(cornerPoints.topLeft, cornerPoints.bottomRight);
+            this.createSelection(selectedFigures);
+            delete this.boxSelection;
+        } else {
+            if (this.dragging) {
+                if (this.dragging.clone.parentElement)
+                    this.dragging.clone.parentElement.removeChild(this.dragging.clone);
+                this.dragging.original.style.opacity = 1;
+                this.dragging.original.style.pointerEvents = 'all';
+            }
+            delete this.dragging;
 
-        if (this.selectedFigure) {
-            if (this.movePoint) {
-                delete this.movePoint;
-                console.log('endmove', this.startMovePosition.distanceTo(this.selectedFigure.position));
-                if (this.startMovePosition.distanceTo(this.selectedFigure.position) > 0)
-                    this.undoStack.push(new SetFigurePosition(this.selectedFigure, this.startMovePosition, this.selectedFigure.position));
-            } else {
-                if (this.startResizeSize) {
-                    console.log('endresize');
-                    let endResizeSize = [this.selectedFigure.cornerPoints.topLeft, this.selectedFigure.cornerPoints.bottomRight],
-                        distanceTL = this.startResizeSize[0].distanceTo(endResizeSize[0]),
-                        distanceBR = this.startResizeSize[1].distanceTo(endResizeSize[1]);
-                    if (distanceTL > 0 || distanceBR > 0)
-                        this.undoStack.push(new SetFigureSize(this.selectedFigure, this.startResizeSize, endResizeSize));
-                    delete this.selectedFigure.selectedGrabPoint;
-                    delete this.startResizeSize;
+            if (this.selectedFigure) {
+                if (this.movePoint) {
+                    delete this.movePoint;
+                    if (this.startMovePosition.distanceTo(this.selectedFigure.position) > 0)
+                        this.undoStack.push(new SetFigurePosition(this.selectedFigure, this.startMovePosition, this.selectedFigure.position));
+                } else {
+                    if (this.startResizeSize) {
+                        let endResizeSize = [this.selectedFigure.cornerPoints.topLeft, this.selectedFigure.cornerPoints.bottomRight],
+                            distanceTL = this.startResizeSize[0].distanceTo(endResizeSize[0]),
+                            distanceBR = this.startResizeSize[1].distanceTo(endResizeSize[1]);
+                        if (distanceTL > 0 || distanceBR > 0)
+                            this.undoStack.push(new SetFigureSize(this.selectedFigure, this.startResizeSize, endResizeSize));
+                        delete this.selectedFigure.selectedGrabPoint;
+                        delete this.startResizeSize;
+                    }
                 }
             }
         }
@@ -308,6 +337,8 @@ class Canvas {
         this.figures.draw(this);
 
         if (this.selectedFigure) this.selectedFigure.drawBoundingBox(this);
+
+        if (this.boxSelection) this.boxSelection.figure.draw(this);
 
         let canvas = this;
         requestAnimationFrame(function() {

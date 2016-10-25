@@ -58,13 +58,18 @@ class Figure {
         return this._y;
     }
 
-    setSize(pointA, pointB) {
+    fixPoints(pointA, pointB) {
         let xs = [pointA.x, pointB.x].sort((a, b) => a - b),
             ys = [pointA.y, pointB.y].sort((a, b) => a - b);
         pointA.x = xs[0];
         pointA.y = ys[0];
         pointB.x = xs[1];
         pointB.y = ys[1];
+        return [pointA, pointB];
+    }
+
+    setSize(pointA, pointB) {
+        this.fixPoints(pointA, pointB);
         this.x = pointA.x;
         this.y = pointA.y;
         this.width = pointB.x - pointA.x;
@@ -232,6 +237,15 @@ class Figure {
 
     isInFigure(x, y) {
         return x >= this.x && x <= this.x + this.width && y >= this.y && y <= this.y + this.height ? this : false;;
+    }
+    isInSelection(topLeft, bottomRight) {
+        let cornerPoints = this.cornerPoints,
+            left = topLeft.x,
+            right = bottomRight.x,
+            top = topLeft.y,
+            bottom = bottomRight.y;
+        return (cornerPoints.topLeft.x > left && cornerPoints.bottomRight.x < right) &&
+            (cornerPoints.topLeft.y > top && cornerPoints.bottomRight.y < bottom);
     }
 
     set zIndex(val) {

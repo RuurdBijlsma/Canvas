@@ -41,6 +41,7 @@ class Group extends Figure {
     get y() {
         return this.cornerPoints.topLeft.y;
     }
+
     set x(newX) {
         let added = newX - this.x;
         if (this.children)
@@ -57,16 +58,19 @@ class Group extends Figure {
             }
         this.calculateGrabPoints();
     }
+
     get height() {
         let points = this.cornerPoints,
             height = Math.abs(points.topLeft.y - points.bottomRight.y);
         return height;
     }
+
     get width() {
         let points = this.cornerPoints,
             width = Math.abs(points.topLeft.x - points.bottomRight.x);
         return width;
     }
+
     set height(newHeight) {
         if (this.children) {
             let factor = newHeight / this.height;
@@ -79,6 +83,7 @@ class Group extends Figure {
         }
         this.calculateGrabPoints();
     }
+
     set width(newWidth) {
         if (this.children) {
             let factor = newWidth / this.width;
@@ -95,11 +100,13 @@ class Group extends Figure {
     isInFigure(x, y) {
         return this.getFigure(x, y);
     }
+
     draw(canvas) {
         for (let figure of this.children)
             if (figure.draw)
                 figure.draw(canvas);
     }
+
     getFigure(x, y) {
         for (let i = this.children.length - 1; i >= 0; i--) {
             let selected = this.children[i].isInFigure(x, y);
@@ -108,10 +115,23 @@ class Group extends Figure {
         }
         return false;
     }
+
+    getFiguresFromSelection(topLeft, bottomRight) {
+        let figures = [];
+
+        for (let child of this.children)
+            if (child instanceof Group)
+                figures = figures.concat(child.getFiguresFromSelection(topLeft, bottomRight));
+            else if (child.isInSelection(topLeft, bottomRight)) figures.push(child);
+
+        return figures;
+    }
+
     set domElement(element) {
         this._domElement = element;
         this.updateHTML();
     }
+
     updateHTML() {
         if (this.parent)
             this.parent.updateHTML();
@@ -122,6 +142,7 @@ class Group extends Figure {
                 CANVAS.selectById(CANVAS.selectedFigure.id);
         }
     }
+
     findById(id) {
         id = parseInt(id);
         if (id === this.id)
@@ -136,12 +157,14 @@ class Group extends Figure {
         }
         return undefined;
     }
+
     remove(figure) {
         this.children.remove(figure);
         for (let child of this.children)
             if (child instanceof Group)
                 child.remove(figure);
     }
+
     toHTML() {
         let result = `<group onmousedown='CANVAS.startDragging(event)'><group-name onclick='CANVAS.selectById(${this.id})' onmouseup='CANVAS.addToGroup(event)' id='${this.id}'>Group</group-name><group-items>`;
         for (let item of this.children)
@@ -151,13 +174,14 @@ class Group extends Figure {
         </group>`;
         return result;
     }
+
     toString(tabs = 0) {
         let result = '';
         for (let i = 0; i < tabs; i++)
             result += '\t';
 
         result += `group ${this.children.filter(child=>!(child instanceof Group)).length}\n`;
-        
+
         for (let child of this.children)
             result += child.toString(tabs + 1);
 
