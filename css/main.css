@@ -116,6 +116,9 @@ label,
     width: calc(100% - 23px);
     display: inline-block;
 }
+#zIndex {
+    width: calc(100% - 61px) !important;
+}
 
 #renderer {
     background-color: white;

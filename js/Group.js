@@ -101,7 +101,7 @@ class Group extends Figure {
                 figure.draw(canvas);
     }
     getFigure(x, y) {
-        for(let i=this.children.length-1;i>=0;i--){
+        for (let i = this.children.length - 1; i >= 0; i--) {
             let selected = this.children[i].isInFigure(x, y);
             if (selected)
                 return selected;
@@ -116,13 +116,17 @@ class Group extends Figure {
         if (this.parent)
             this.parent.updateHTML();
 
-        if (this._domElement)
+        if (this._domElement) {
             this._domElement.innerHTML = this.toHTML();
+            if (CANVAS.selectedFigure)
+                CANVAS.selectById(CANVAS.selectedFigure.id);
+        }
     }
     toHTML() {
         let result = `<group><group-name onclick='CANVAS.selectById(${this.id})' id='${this.id}'>Group</group-name><group-items>`;
         for (let item of this.children)
             result += item.toHTML();
+
         result += `</group-items>
         </group>`;
         return result;

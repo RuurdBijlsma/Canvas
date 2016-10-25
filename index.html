@@ -35,18 +35,29 @@
     <div id='right-menu'>
         <div id='figure-list'></div>
         <div id='figure-info'>
-            <h4>Rectangle (ID: 4)</h4>
+            <h4 id='figure-title'>Rectangle (ID: 4)</h4>
             <div id='properties'>
                 <div id='position'>
                     <h5>Position</h5>
-                    <label>X: <input type='number' placeholder='X Position' id='x'></label>
-                    <label>Y: <input type='number' placeholder='Y Position' id='y'></label>
+                    <label>X:
+                        <input type='number' placeholder='X Position' id='x'>
+                    </label>
+                    <label>Y:
+                        <input type='number' placeholder='Y Position' id='y'>
+                    </label>
                 </div>
                 <div id='size'>
                     <h5>Size</h5>
-                    <label>X: <input type='number' placeholder='X Size' id='width'></label>
-                    <label>Y: <input type='number' placeholder='Y Size' id='height'></label>
+                    <label>X:
+                        <input type='number' placeholder='X Size' id='width'>
+                    </label>
+                    <label>Y:
+                        <input type='number' placeholder='Y Size' id='height'>
+                    </label>
                 </div>
+                <label>Z-index
+                    <input type='number' placeholder='z-index' id='zIndex'>
+                </label>
             </div>
             <input type='button' value='Delete' onclick='CANVAS.deleteSelected()'>
         </div>

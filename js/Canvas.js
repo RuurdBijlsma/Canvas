@@ -14,10 +14,7 @@ class Canvas {
 
         this.setCanvasSize();
         let canvas = this;
-        window.addEventListener('resize', function() {
-            canvas.setCanvasSize();
-        }, false);
-
+        window.addEventListener('resize', () => this.setCanvasSize());
 
         this.undoStack = new UndoStack();
 
@@ -33,48 +30,31 @@ class Canvas {
             mouseDown: false
         };
 
-        let rightMenu = document.getElementById('right-menu');
-        rightMenu.addEventListener('mousedown', e => e.stopPropagation());
-        rightMenu.addEventListener('touchstart', e => e.stopPropagation());
-
         this.inputs = {
             xPos: document.getElementById('x'),
             yPos: document.getElementById('y'),
             xSize: document.getElementById('width'),
-            ySize: document.getElementById('height')
+            ySize: document.getElementById('height'),
+            zIndex: document.getElementById('zIndex')
         };
         for (let input in this.inputs)
             this.inputs[input].addEventListener('change', e => this.handlePropertyChange(e));
 
-        document.addEventListener('mousedown', function() {
-            canvas.handleMouseDown();
-        }, false);
-        document.addEventListener('mouseup', function() {
-            canvas.handleMouseUp();
-        }, false);
-        document.addEventListener('mousemove', function(e) {
-            let x = e.pageX - canvas.element.offsetLeft,
-                y = e.pageY - canvas.element.offsetTop;
-            canvas.handleMove(x, y);
-        }, false);
+        let rightMenu = document.getElementById('right-menu');
+        rightMenu.addEventListener('mousedown', e => e.stopPropagation());
+        rightMenu.addEventListener('touchstart', e => e.stopPropagation());
+
+        document.addEventListener('keydown', e => this.handleKeyDown(e));
+        document.addEventListener('mousedown', () => this.handleMouseDown());
+        document.addEventListener('mouseup', () => this.handleMouseUp());
+        document.addEventListener('mousemove', e => this.handleMove(e.pageX - this.element.offsetLeft, e.pageY - this.element.offsetTop));
+        document.addEventListener('touchend', () => this.handleMouseUp());
+        document.addEventListener('touchmove', e => this.handleMove(e.touches[0].pageX - this.element.offsetLeft, e.touches[0].pageY - this.element.offsetTop));
         document.addEventListener('touchstart', function(e) {
             let x = e.touches[0].pageX - canvas.element.offsetLeft,
                 y = e.touches[0].pageY - canvas.element.offsetTop;
             canvas.handleMove(x, y);
-
             canvas.handleMouseDown();
-        }, false);
-        document.addEventListener('touchend', function() {
-            canvas.handleMouseUp();
-        }, false);
-        document.addEventListener('touchmove', function(e) {
-            let x = e.touches[0].pageX - canvas.element.offsetLeft,
-                y = e.touches[0].pageY - canvas.element.offsetTop;
-
-            canvas.handleMove(x, y);
-        }, false);
-        document.addEventListener('keydown', function(e) {
-            canvas.handleKeyDown(e);
         });
 
         this.render();
@@ -98,27 +78,62 @@ class Canvas {
             if (item.id == id)
                 item.setAttribute('selected', '');
         }
+        this.displayFigureInfo(this.selectedFigure);
     }
 
     displayFigureInfo(figure) {
-        let infoElement = document.getElementById('figure-info');
+        let infoElement = document.getElementById('figure-info'),
+            figureTitle = document.getElementById('figure-title');
         if (!figure) {
             let items = document.querySelectorAll('item, group-name');
             for (let item of items)
                 item.removeAttribute('selected');
             infoElement.style.display = 'none';
         } else {
+            figureTitle.innerText = figure.constructor.name + ` (ID: ${figure.id})`;
             infoElement.style.display = 'block';
             this.inputs.xPos.value = this.selectedFigure.x;
             this.inputs.yPos.value = this.selectedFigure.y;
             this.inputs.xSize.value = this.selectedFigure.width;
             this.inputs.ySize.value = this.selectedFigure.height;
+            this.inputs.zIndex.value = this.selectedFigure.zIndex;
         }
     }
 
     handlePropertyChange(e) {
         let property = e.target.id,
-            value = parseInt(e.target.value);
+            value = parseInt(e.target.value),
+            cornerPoints = this.selectedFigure.cornerPoints;
+        switch (property) {
+            case 'width':
+                this.undoStack.push(
+                    new SetFigureSize(this.selectedFigure, [
+                        cornerPoints.topLeft, cornerPoints.bottomRight
+                    ], [
+                        cornerPoints.topLeft, cornerPoints.bottomRight.clone().add(value, 0)
+                    ])
+                );
+                break;
+            case 'height':
+                this.undoStack.push(
+                    new SetFigureSize(this.selectedFigure, [
+                        cornerPoints.topLeft, cornerPoints.bottomRight
+                    ], [
+                        cornerPoints.topLeft, cornerPoints.bottomRight.clone().add(0, value)
+                    ])
+                );
+                break;
+            case 'x':
+                this.undoStack.push(
+                    new SetFigurePosition(this.selectedFigure, this.selectedFigure.position, this.selectedFigure.position.add(value - this.selectedFigure[property], 0))
+                );
+                break;
+            case 'y':
+                this.undoStack.push(
+                    new SetFigurePosition(this.selectedFigure, this.selectedFigure.position, this.selectedFigure.position.add(0, value - this.selectedFigure[property]))
+                );
+                break;
+        }
         this.selectedFigure[property] = value;
     }
 
@@ -172,6 +187,7 @@ class Canvas {
                 this.selectedFigure = this.figures.getFigure(this.mouseInfo.position.x, this.mouseInfo.position.y);
             }
         }
+        this.displayFigureInfo(this.selectedFigure);
     }
 
     handleMove(x, y) {
@@ -185,6 +201,7 @@ class Canvas {
         }
 
         if (this.selectedFigure && this.selectedFigure.selectedGrabPoint) {
+            this.displayFigureInfo(this.selectedFigure);
             this.selectedFigure.selectedGrabPoint.action(this.mouseInfo.position);
             cursorSet = true;
         } else if (this.selectedFigure) {
@@ -196,6 +213,7 @@ class Canvas {
         }
 
         if (this.movePoint) {
+            this.displayFigureInfo(this.selectedFigure);
             this.selectedFigure.x = this.mouseInfo.position.x - this.movePoint.x;
             this.selectedFigure.y = this.mouseInfo.position.y - this.movePoint.y;
         }
