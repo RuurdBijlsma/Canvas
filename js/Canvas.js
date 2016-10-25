@@ -1,5 +1,7 @@
 //onfixbare bug:
 //Als je group resized van grabpoint naar andere grabpoint doet ie dom
+//todo
+//refactor code
 class Canvas {
     constructor(element) {
         this.element = element;
@@ -220,7 +222,7 @@ class Canvas {
             if (figure && newParent && figure.parent !== newParent) {
                 if (this.dragging.original.parentElement)
                     this.dragging.original.parentElement.removeChild(this.dragging.original);
-                let moveOrder = new MoveFigureOrder(figure, newParent);
+                let moveOrder = new SetFigureOrder(figure, newParent);
                 moveOrder.execute();
                 this.undoStack.push(moveOrder);
             } else {
