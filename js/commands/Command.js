@@ -1,8 +1,5 @@
 class Command {
-    execute(context) {
-        console.log(context);
-    }
-    undo(context) {
-        console.log(context);
+    constructor() {
+        CANVAS.undoStack.push(this);
     }
 }

@@ -1,4 +1,4 @@
-class SetFigureOrder extends Command {
+class SetFigureParent extends Command {
     constructor(figure, newParent) {
         super();
         this.figure = figure;

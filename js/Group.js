@@ -45,17 +45,17 @@ class Group extends Figure {
     set x(newX) {
         let added = newX - this.x;
         if (this.children)
-            for (let child of this.children) {
+            for (let child of this.children)
                 child.x += added;
-            }
+
         this.calculateGrabPoints();
     }
     set y(newY) {
         let added = newY - this.y;
         if (this.children)
-            for (let child of this.children) {
+            for (let child of this.children)
                 child.y += added;
-            }
+
         this.calculateGrabPoints();
     }
 

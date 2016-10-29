@@ -1,5 +1,5 @@
 class Figure {
-    constructor(parent, x, y, width, height, color, zIndex) {
+    constructor(parent, x, y, width, height, color = 'black', zIndex = 0) {
         this.x = x;
         this.y = y;
         this.width = width;

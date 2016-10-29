@@ -13,6 +13,7 @@ class FigureCollection extends Array {
         this.sort();
     }
     sort() {
+        super.sort((a, b) => a.id > b.id);
         super.sort((a, b) => a.zIndex > b.zIndex);
         this.onChange();
     }

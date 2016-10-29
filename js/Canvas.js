@@ -72,8 +72,8 @@ class Canvas {
 
     createSelection(figures) {
         if (figures.length !== 0) {
-            let selectionGroup = new Group();
-            selectionGroup.children = selectionGroup.children.concat(figures);
+            let selectionGroup = new SelectionGroup(figures);
+            console.log(selectionGroup);
             this.selectedFigure = selectionGroup;
         }
     }
@@ -116,32 +116,27 @@ class Canvas {
             cornerPoints = this.selectedFigure.cornerPoints;
         switch (property) {
             case 'width':
-                this.undoStack.push(
-                    new SetFigureSize(this.selectedFigure, [
-                        cornerPoints.topLeft, cornerPoints.bottomRight
-                    ], [
-                        cornerPoints.topLeft, cornerPoints.bottomRight.clone().add(value, 0)
-                    ])
-                );
+                new SetFigureSize(this.selectedFigure, [
+                    cornerPoints.topLeft, cornerPoints.bottomRight
+                ], [
+                    cornerPoints.topLeft, cornerPoints.bottomRight.clone().add(value, 0)
+                ])
                 break;
             case 'height':
-                this.undoStack.push(
-                    new SetFigureSize(this.selectedFigure, [
-                        cornerPoints.topLeft, cornerPoints.bottomRight
-                    ], [
-                        cornerPoints.topLeft, cornerPoints.bottomRight.clone().add(0, value)
-                    ])
-                );
+                new SetFigureSize(this.selectedFigure, [
+                    cornerPoints.topLeft, cornerPoints.bottomRight
+                ], [
+                    cornerPoints.topLeft, cornerPoints.bottomRight.clone().add(0, value)
+                ])
                 break;
             case 'x':
-                this.undoStack.push(
-                    new SetFigurePosition(this.selectedFigure, this.selectedFigure.position, this.selectedFigure.position.add(value - this.selectedFigure[property], 0))
-                );
+                new SetFigurePosition(this.selectedFigure, this.selectedFigure.position, this.selectedFigure.position.add(value - this.selectedFigure[property], 0))
                 break;
             case 'y':
-                this.undoStack.push(
-                    new SetFigurePosition(this.selectedFigure, this.selectedFigure.position, this.selectedFigure.position.add(0, value - this.selectedFigure[property]))
-                );
+                new SetFigurePosition(this.selectedFigure, this.selectedFigure.position, this.selectedFigure.position.add(0, value - this.selectedFigure[property]))
+                break;
+            case 'zIndex':
+                new SetFigureZIndex(this.selectedFigure, value);
                 break;
         }
         this.selectedFigure[property] = value;
@@ -159,7 +154,6 @@ class Canvas {
     deleteSelected() {
         if (this.selectedFigure) {
             let removal = new RemoveFigure(this.selectedFigure);
-            this.undoStack.push(removal);
             removal.execute();
             this.selectedFigure = undefined;
         }
@@ -200,7 +194,7 @@ class Canvas {
         if (!this.selectedFigure) {
             this.boxSelection = {
                 startPoint: this.mouseInfo.position.clone(),
-                figure: new Rectangle(undefined, this.mouseInfo.position.x, this.mouseInfo.position.y, 0, 0, 'rgba(0, 120, 200, 0.4)', Infinity)
+                figure: new SelectionRectangle(this.mouseInfo.position.x, this.mouseInfo.position.y)
             };
         }
     }
@@ -222,9 +216,8 @@ class Canvas {
             if (figure && newParent && figure.parent !== newParent) {
                 if (this.dragging.original.parentElement)
                     this.dragging.original.parentElement.removeChild(this.dragging.original);
-                let moveOrder = new SetFigureOrder(figure, newParent);
+                let moveOrder = new SetFigureParent(figure, newParent);
                 moveOrder.execute();
-                this.undoStack.push(moveOrder);
             } else {
                 this.dragging.original.style.opacity = 1;
                 this.dragging.original.style.pointerEvents = 'all';
@@ -317,14 +310,14 @@ class Canvas {
                 if (this.movePoint) {
                     delete this.movePoint;
                     if (this.startMovePosition.distanceTo(this.selectedFigure.position) > 0)
-                        this.undoStack.push(new SetFigurePosition(this.selectedFigure, this.startMovePosition, this.selectedFigure.position));
+                        new SetFigurePosition(this.selectedFigure, this.startMovePosition, this.selectedFigure.position);
                 } else {
                     if (this.startResizeSize) {
                         let endResizeSize = [this.selectedFigure.cornerPoints.topLeft, this.selectedFigure.cornerPoints.bottomRight],
                             distanceTL = this.startResizeSize[0].distanceTo(endResizeSize[0]),
                             distanceBR = this.startResizeSize[1].distanceTo(endResizeSize[1]);
                         if (distanceTL > 0 || distanceBR > 0)
-                            this.undoStack.push(new SetFigureSize(this.selectedFigure, this.startResizeSize, endResizeSize));
+                            new SetFigureSize(this.selectedFigure, this.startResizeSize, endResizeSize);
                         delete this.selectedFigure.selectedGrabPoint;
                         delete this.startResizeSize;
                     }
