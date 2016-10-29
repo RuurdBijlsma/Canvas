@@ -14,7 +14,6 @@ class Canvas {
 
         this.setCanvasSize();
         let canvas = this;
-        window.addEventListener('resize', () => this.setCanvasSize());
 
         this.undoStack = new UndoStack();
 
@@ -57,6 +56,7 @@ class Canvas {
             canvas.handleMove(x, y);
             canvas.handleMouseDown();
         });
+        window.addEventListener('resize', () => this.setCanvasSize());
 
         this.render();
     }
