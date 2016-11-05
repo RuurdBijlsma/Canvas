@@ -9,25 +9,23 @@ class Figure {
 
         this.calculateGrabPoints();
 
+        if(!Figure.figureAmount) Figure.figureAmount = 0;
         this.id = Figure.figureAmount++;
 
         this.zIndexUpdated = function() {};
         this.zIndex = zIndex;
     }
 
-    static set figureAmount(n) { this._figureAmount = n; };
-    static get figureAmount() {
-        if (!this._figureAmount)
-            this._figureAmount = 0;
-        return this._figureAmount;
-    };
+    accept(visitor){
+        visitor.visit(this);
+    }
 
     get position() {
         return new Vector2(this.x, this.y);
     }
 
     set width(width) {
-        this._width = width >= 0 ? width : 0;
+        this._width = width >= 0 ? width : this.width;
         this.calculateGrabPoints();
     }
     get width() {
@@ -35,7 +33,7 @@ class Figure {
     }
 
     set height(height) {
-        this._height = height >= 0 ? height : 0;
+        this._height = height >= 0 ? height : this.height;
         this.calculateGrabPoints();
     }
     get height() {
@@ -58,6 +56,15 @@ class Figure {
         return this._y;
     }
 
+    get cornerPoints() {
+        return {
+            topLeft: this.position,
+            bottomRight: this.position.add(this.width, this.height),
+            topRight: this.position.add(this.width, 0),
+            bottomLeft: this.position.add(0, this.height)
+        }
+    }
+
     fixPoints(pointA, pointB) {
         let xs = [pointA.x, pointB.x].sort((a, b) => a - b),
             ys = [pointA.y, pointB.y].sort((a, b) => a - b);
@@ -74,14 +81,6 @@ class Figure {
         this.y = pointA.y;
         this.width = pointB.x - pointA.x;
         this.height = pointB.y - pointA.y;
-    }
-    get cornerPoints() {
-        return {
-            topLeft: this.position,
-            bottomRight: this.position.add(this.width, this.height),
-            topRight: this.position.add(this.width, 0),
-            bottomLeft: this.position.add(0, this.height)
-        }
     }
     calculateGrabPoints() {
         let figure = this;
@@ -236,8 +235,9 @@ class Figure {
     }
 
     isInFigure(x, y) {
-        return x >= this.x && x <= this.x + this.width && y >= this.y && y <= this.y + this.height ? this : false;;
+        return x >= this.x && x <= this.x + this.width && y >= this.y && y <= this.y + this.height ? this : false;
     }
+    
     isInSelection(topLeft, bottomRight) {
         let cornerPoints = this.cornerPoints,
             left = topLeft.x,

@@ -9,6 +9,14 @@ class Group extends Figure {
             this.children.push(child);
     }
 
+    accept(visitor) {
+        // if (this.hasOwnProperty(visitor.property))
+        //     visitor.visit(this);
+        if (this.children)
+            for (let child of this.children)
+                child.accept(visitor);
+    }
+
     get cornerPoints() {
         let leftMax = Infinity,
             topMax = Infinity,
@@ -36,25 +44,25 @@ class Group extends Figure {
     }
 
     get x() {
-        return this.cornerPoints.topLeft.x;
+        let xGetter = new GetVisitor('x', Infinity, (lowest, check) => check < lowest ? check : lowest);
+        this.accept(xGetter);
+        return xGetter.result;
     }
     get y() {
-        return this.cornerPoints.topLeft.y;
+        let yGetter = new GetVisitor('y', Infinity, (lowest, check) => check < lowest ? check : lowest);
+        this.accept(yGetter);
+        return yGetter.result;
     }
 
     set x(newX) {
-        let added = newX - this.x;
-        if (this.children)
-            for (let child of this.children)
-                child.x += added;
+        let xSetter = new SetVisitor('x', newX - this.x);
+        this.accept(xSetter);
 
         this.calculateGrabPoints();
     }
     set y(newY) {
-        let added = newY - this.y;
-        if (this.children)
-            for (let child of this.children)
-                child.y += added;
+        let ySetter = new SetVisitor('y', newY - this.y);
+        this.accept(ySetter);
 
         this.calculateGrabPoints();
     }
@@ -72,29 +80,27 @@ class Group extends Figure {
     }
 
     set height(newHeight) {
-        if (this.children) {
-            let factor = newHeight / this.height;
-            for (let child of this.children) {
-                newHeight = child.height * factor;
-                child.height = newHeight > 0 ? newHeight : child.height;
-                let deltaPos = (child.y - this.y) * (factor - 1);
-                child.y += deltaPos;
-            }
+        let factor = newHeight / this.height;
+        if (factor !== 0) {
+            let heightSetter = new SetVisitor('height', factor, (a, b) => a * b),
+                ySetter = new SetVisitor('y', factor, (a, b) => a + (a - this.y) * (factor - 1));
+            this.accept(heightSetter);
+            this.accept(ySetter);
+
+            this.calculateGrabPoints();
         }
-        this.calculateGrabPoints();
     }
 
     set width(newWidth) {
-        if (this.children) {
-            let factor = newWidth / this.width;
-            for (let child of this.children) {
-                newWidth = child.width * factor;
-                child.width = newWidth > 0 ? newWidth : child.width;
-                let deltaPos = (child.x - this.x) * (factor - 1);
-                child.x += deltaPos;
-            }
+        let factor = newWidth / this.width;
+        if (factor !== 0) {
+            let widthSetter = new SetVisitor('width', factor, (a, b) => a * b),
+                xSetter = new SetVisitor('x', factor, (a, b) => a + (a - this.x) * (factor - 1));
+            this.accept(widthSetter);
+            this.accept(xSetter);
+
+            this.calculateGrabPoints();
         }
-        this.calculateGrabPoints();
     }
 
     isInFigure(x, y) {
@@ -180,7 +186,7 @@ class Group extends Figure {
         for (let i = 0; i < tabs; i++)
             result += '\t';
 
-        result += `group ${this.children.filter(child=>!(child instanceof Group)).length}\n`;
+        result += `Group ${this.children.filter(child=>!(child instanceof Group)).length}\n`;
 
         for (let child of this.children)
             result += child.toString(tabs + 1);

@@ -68,12 +68,11 @@ class Canvas {
     }
     get selectedFigure() {
         return this._selectedFigure
-    };
+    }
 
     createSelection(figures) {
         if (figures.length !== 0) {
             let selectionGroup = new SelectionGroup(figures);
-            console.log(selectionGroup);
             this.selectedFigure = selectionGroup;
         }
     }
