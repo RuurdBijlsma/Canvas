@@ -334,10 +334,7 @@ class Canvas {
 
         if (this.boxSelection) this.boxSelection.figure.draw(this);
 
-        let canvas = this;
-        requestAnimationFrame(function() {
-            canvas.render();
-        });
+        requestAnimationFrame(()=>this.render());
     }
 
     setCursor(type) {

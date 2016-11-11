@@ -10,8 +10,8 @@ class Group extends Figure {
     }
 
     accept(visitor) {
-        // if (this.hasOwnProperty(visitor.property))
-        //     visitor.visit(this);
+        if (visitor instanceof GroupVisitor)
+            visitor.visit(this);
         if (this.children)
             for (let child of this.children)
                 child.accept(visitor);
@@ -181,15 +181,17 @@ class Group extends Figure {
         return result;
     }
 
-    toString(tabs = 0) {
+    toString(tabs = 0) {}
+
+    get string() {
         let result = '';
-        for (let i = 0; i < tabs; i++)
+        for (let i = 0; i < this.indentation; i++)
             result += '\t';
 
         result += `Group ${this.children.filter(child=>!(child instanceof Group)).length}\n`;
 
-        for (let child of this.children)
-            result += child.toString(tabs + 1);
+        // for (let child of this.children)
+        //     result += child.toString(tabs + 1);
 
         return result;
     }

@@ -9,14 +9,14 @@ class Figure {
 
         this.calculateGrabPoints();
 
-        if(!Figure.figureAmount) Figure.figureAmount = 0;
+        if (!Figure.figureAmount) Figure.figureAmount = 0;
         this.id = Figure.figureAmount++;
 
         this.zIndexUpdated = function() {};
         this.zIndex = zIndex;
     }
 
-    accept(visitor){
+    accept(visitor) {
         visitor.visit(this);
     }
 
@@ -237,7 +237,7 @@ class Figure {
     isInFigure(x, y) {
         return x >= this.x && x <= this.x + this.width && y >= this.y && y <= this.y + this.height ? this : false;
     }
-    
+
     isInSelection(topLeft, bottomRight) {
         let cornerPoints = this.cornerPoints,
             left = topLeft.x,
@@ -261,9 +261,24 @@ class Figure {
         return `<item id='${this.id}' onclick='CANVAS.selectById(${this.id})' onmousedown='CANVAS.startDragging(event)'>${this.constructor.name}</item>`;
     }
 
-    toString(tabs = 0) {
+    // toString(tabs = 0) {
+    //     let result = '';
+    //     for (let i = 0; i < tabs; i++)
+    //         result += '\t';
+
+    //     return result + `${this.constructor.name} ${this.x} ${this.y} ${this.width} ${this.height}\n`;
+    // }
+    get indentation() {
+        let parents = 0;
+        if (!this.parent)
+            return -1;
+        else
+            return this.parent.indentation + 1;
+    }
+
+    get string() {
         let result = '';
-        for (let i = 0; i < tabs; i++)
+        for (let i = 0; i < this.indentation; i++)
             result += '\t';
 
         return result + `${this.constructor.name} ${this.x} ${this.y} ${this.width} ${this.height}\n`;
