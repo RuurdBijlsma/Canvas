@@ -193,7 +193,7 @@ class Canvas {
         if (!this.selectedFigure) {
             this.boxSelection = {
                 startPoint: this.mouseInfo.position.clone(),
-                figure: new DrawableFigure(null, SelectionDrawer.instance, this.mouseInfo.position.x, this.mouseInfo.position.y)
+                figure: new DrawableFigure(null, SelectionDrawer, this.mouseInfo.position.x, this.mouseInfo.position.y)
             };
         }
     }
@@ -334,7 +334,8 @@ class Canvas {
 
         if (this.selectedFigure) this.selectedFigure.drawBoundingBox(this);
 
-        if (this.boxSelection) this.boxSelection.figure.draw(this.context);
+        if (this.boxSelection)
+            this.boxSelection.figure.draw(this.context);
 
         requestAnimationFrame(() => this.render());
     }

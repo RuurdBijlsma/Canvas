@@ -100,6 +100,7 @@ class Group extends Figure {
     }
 
     draw(context) {
+        super.draw(context);
         for (let figure of this.children)
             if (figure.draw)
                 figure.draw(context);

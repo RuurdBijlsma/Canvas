@@ -10,10 +10,12 @@ class AddFigure extends Command {
         this.zIndex = zIndex;
         this.instance = instance;
     }
+
     execute() {
         this.figure = new this.instance(this.parent, this.x, this.y, this.w, this.h, this.color, this.zIndex);
         this.parent.children.push(this.figure);
     }
+    
     undo() {
         this.parent.children.remove(this.figure);
     }

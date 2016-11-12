@@ -1,9 +1,10 @@
 class SelectionDrawer extends Singleton {
-    draw(context, x, y, width, height) {
+    draw(context, figure) {
         context.fillStyle = 'rgba(0, 120, 200, 0.4)';
-        context.fillRect(x, y, width, height);
+        context.fillRect(figure.x, figure.y, figure.width, figure.height);
     }
+
     get name() {
-        return 'rectangle'
+        return 'Selection'
     }
 }

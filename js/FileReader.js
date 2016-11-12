@@ -49,10 +49,10 @@ class FileReader {
                     color = '#' + (0x1000000 + (Math.random()) * 0xffffff).toString(16).substr(1, 6);
                 switch (object.type) {
                     case 'ellipse':
-                        object = new DrawableFigure(lastGroup, EllipsisDrawer.instance, x, y, w, h, color, 0);
+                        object = new DrawableFigure(lastGroup, EllipsisDrawer, x, y, w, h, color, 0);
                         break;
                     case 'rectangle':
-                        object = new DrawableFigure(lastGroup, RectangleDrawer.instance, x, y, w, h, color, 0);
+                        object = new DrawableFigure(lastGroup, RectangleDrawer, x, y, w, h, color, 0);
                         break;
                 }
                 object.tabs = object.tabs;

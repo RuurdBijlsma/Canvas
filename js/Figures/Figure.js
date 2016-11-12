@@ -12,6 +12,22 @@ class Figure {
         this.zIndexUpdated = function() {};
         this.zIndex = zIndex;
         this.grabPoints = new GrabPointCalculator(this);
+
+        this.captions = [];
+    }
+
+    draw(context) {
+        for (let caption of this.captions)
+            caption.draw(context);
+    }
+
+    addCaption(caption) {
+        caption.figure = this;
+        this.captions.push(caption);
+    }
+    removeCaption(caption) {
+        let index = this.captions.indexOf(caption);
+        this.captions.splice(index, 1);
     }
 
     accept(visitor) {
@@ -56,6 +72,15 @@ class Figure {
             bottomRight: this.position.add(this.width, this.height),
             topRight: this.position.add(this.width, 0),
             bottomLeft: this.position.add(0, this.height)
+        }
+    }
+
+    get sides() {
+        return {
+            top: this.position.add(this.width / 2, 0),
+            bottom: this.position.add(this.width / 2, this.height),
+            left: this.position.add(0, this.height / 2),
+            right: this.position.add(this.width, this.height / 2),
         }
     }
 
@@ -117,7 +142,7 @@ class Figure {
     toHTML() {
         return `<item id='${this.id}' onclick='CANVAS.selectById(${this.id})' onmousedown='CANVAS.startDragging(event)'>${this.constructor.name}</item>`;
     }
-    
+
     toString() {
         let stringVisitor = new GroupVisitor('string', '');
         this.accept(stringVisitor);

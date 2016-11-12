@@ -1,11 +1,12 @@
 class DrawableFigure extends Figure {
-    constructor(parent, drawer, x, y, width = 0, height = 0, color = '#ff00ff', zIndex) {
+    constructor(parent, drawer, x, y, width = 0, height = 0, color = '#ff00ff', zIndex = 0) {
         super(parent, x, y, width, height, zIndex);
-        this.drawer = drawer;
+        this.drawer = drawer.instance;
         this.color = color;
     }
 
     draw(context) {
+        super.draw(context);
         context.fillStyle = this.color;
         this.drawer.draw(context, this);
     }
