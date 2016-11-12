@@ -57,14 +57,10 @@ class Group extends Figure {
     set x(newX) {
         let xSetter = new SetVisitor('x', newX - this.x);
         this.accept(xSetter);
-
-        this.calculateGrabPoints();
     }
     set y(newY) {
         let ySetter = new SetVisitor('y', newY - this.y);
         this.accept(ySetter);
-
-        this.calculateGrabPoints();
     }
 
     get height() {
@@ -86,8 +82,6 @@ class Group extends Figure {
                 ySetter = new SetVisitor('y', factor, (a, b) => a + (a - this.y) * (factor - 1));
             this.accept(heightSetter);
             this.accept(ySetter);
-
-            this.calculateGrabPoints();
         }
     }
 
@@ -98,8 +92,6 @@ class Group extends Figure {
                 xSetter = new SetVisitor('x', factor, (a, b) => a + (a - this.x) * (factor - 1));
             this.accept(widthSetter);
             this.accept(xSetter);
-
-            this.calculateGrabPoints();
         }
     }
 
@@ -107,10 +99,10 @@ class Group extends Figure {
         return this.getFigure(x, y);
     }
 
-    draw(canvas) {
+    draw(context) {
         for (let figure of this.children)
             if (figure.draw)
-                figure.draw(canvas);
+                figure.draw(context);
     }
 
     getFigure(x, y) {
@@ -181,17 +173,13 @@ class Group extends Figure {
         return result;
     }
 
-    toString(tabs = 0) {}
-
     get string() {
         let result = '';
         for (let i = 0; i < this.indentation; i++)
             result += '\t';
 
-        result += `Group ${this.children.filter(child=>!(child instanceof Group)).length}\n`;
-
-        // for (let child of this.children)
-        //     result += child.toString(tabs + 1);
+        // result += `group ${this.children.filter(child=>!(child instanceof Group)).length}\n`;
+        result += `Group ${this.children.length}\n`;
 
         return result;
     }

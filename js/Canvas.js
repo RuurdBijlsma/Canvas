@@ -80,7 +80,6 @@ class Canvas {
     selectById(id) {
         if (id)
             this._selectedFigure = this.figures.findById(id);
-        if (this.selectedFigure) this._selectedFigure.calculateGrabPoints();
         let items = document.querySelectorAll('item, group-name');
         for (let item of items) {
             item.removeAttribute('selected');
@@ -167,11 +166,12 @@ class Canvas {
         } else {
             let closest = Infinity,
                 bestGrabber;
-            for (let grabPoint in this.selectedFigure.grabPoints) {
-                let distance = this.selectedFigure.grabPoints[grabPoint].position.distanceTo(this.mouseInfo.position);
+            for (let point in this.selectedFigure.grabPoints.positions) {
+                let position = this.selectedFigure.grabPoints.positions[point];
+                let distance = position.distanceTo(this.mouseInfo.position);
                 if (distance < closest) {
                     closest = distance;
-                    bestGrabber = this.selectedFigure.grabPoints[grabPoint];
+                    bestGrabber = this.selectedFigure.grabPoints[point];
                 }
             }
 
@@ -193,7 +193,7 @@ class Canvas {
         if (!this.selectedFigure) {
             this.boxSelection = {
                 startPoint: this.mouseInfo.position.clone(),
-                figure: new SelectionRectangle(this.mouseInfo.position.x, this.mouseInfo.position.y)
+                figure: new DrawableFigure(null, SelectionDrawer.instance, this.mouseInfo.position.x, this.mouseInfo.position.y)
             };
         }
     }
@@ -268,11 +268,13 @@ class Canvas {
             this.selectedFigure.selectedGrabPoint.action(this.mouseInfo.position);
             cursorSet = true;
         } else if (this.selectedFigure) {
-            for (let grabPoint in this.selectedFigure.grabPoints)
-                if (this.selectedFigure.grabPoints[grabPoint].position.distanceTo(this.mouseInfo.position) < this.grabPointSize) {
-                    this.setCursor(grabPoint);
+            for (let point in this.selectedFigure.grabPoints.positions) {
+                let position = this.selectedFigure.grabPoints.positions[point];
+                if (position.distanceTo(this.mouseInfo.position) < this.grabPointSize) {
+                    this.setCursor(point);
                     cursorSet = true;
                 }
+            }
         }
 
         if (this.movePoint) {
@@ -328,13 +330,13 @@ class Canvas {
     render() {
         this.context.clearRect(0, 0, this.width, this.height);
 
-        this.figures.draw(this);
+        this.figures.draw(this.context);
 
         if (this.selectedFigure) this.selectedFigure.drawBoundingBox(this);
 
-        if (this.boxSelection) this.boxSelection.figure.draw(this);
+        if (this.boxSelection) this.boxSelection.figure.draw(this.context);
 
-        requestAnimationFrame(()=>this.render());
+        requestAnimationFrame(() => this.render());
     }
 
     setCursor(type) {

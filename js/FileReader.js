@@ -49,10 +49,10 @@ class FileReader {
                     color = '#' + (0x1000000 + (Math.random()) * 0xffffff).toString(16).substr(1, 6);
                 switch (object.type) {
                     case 'ellipse':
-                        object = new Ellipsis(lastGroup, x, y, w, h, color);
+                        object = new DrawableFigure(lastGroup, EllipsisDrawer.instance, x, y, w, h, color, 0);
                         break;
                     case 'rectangle':
-                        object = new Rectangle(lastGroup, x, y, w, h, color); //vraag: moet de toegevoegde rectangles via IO ook in de undostack komen
+                        object = new DrawableFigure(lastGroup, RectangleDrawer.instance, x, y, w, h, color, 0);
                         break;
                 }
                 object.tabs = object.tabs;

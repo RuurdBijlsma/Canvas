@@ -1,19 +1,17 @@
 class Figure {
-    constructor(parent, x, y, width, height, color = 'black', zIndex = 0) {
+    constructor(parent, x, y, width, height, zIndex = 0) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
-        this.color = color;
         this.parent = parent;
-
-        this.calculateGrabPoints();
 
         if (!Figure.figureAmount) Figure.figureAmount = 0;
         this.id = Figure.figureAmount++;
 
         this.zIndexUpdated = function() {};
         this.zIndex = zIndex;
+        this.grabPoints = new GrabPointCalculator(this);
     }
 
     accept(visitor) {
@@ -26,7 +24,6 @@ class Figure {
 
     set width(width) {
         this._width = width >= 0 ? width : this.width;
-        this.calculateGrabPoints();
     }
     get width() {
         return this._width;
@@ -34,7 +31,6 @@ class Figure {
 
     set height(height) {
         this._height = height >= 0 ? height : this.height;
-        this.calculateGrabPoints();
     }
     get height() {
         return this._height;
@@ -42,7 +38,6 @@ class Figure {
 
     set x(x) {
         this._x = x;
-        this.calculateGrabPoints();
     }
     get x() {
         return this._x;
@@ -50,7 +45,6 @@ class Figure {
 
     set y(y) {
         this._y = y;
-        this.calculateGrabPoints();
     }
     get y() {
         return this._y;
@@ -82,143 +76,6 @@ class Figure {
         this.width = pointB.x - pointA.x;
         this.height = pointB.y - pointA.y;
     }
-    calculateGrabPoints() {
-        let figure = this;
-        this.grabPoints = {
-            left: {
-                position: new Vector2(
-                    this.x,
-                    this.y + this.height / 2
-                ),
-                action: function(mousePos) {
-                    if (mousePos.x >= figure.cornerPoints.topRight.x) {
-                        figure.selectedGrabPoint = figure.grabPoints.right;
-                        figure.setSize(figure.cornerPoints.bottomRight, figure.cornerPoints.topRight);
-                    } else {
-                        let topLeft = new Vector2(mousePos.x, figure.cornerPoints.topLeft.y);
-                        figure.setSize(topLeft, figure.cornerPoints.bottomRight);
-                    }
-                }
-            },
-            right: {
-                position: new Vector2(
-                    this.x + this.width,
-                    this.y + this.height / 2
-                ),
-                action: function(mousePos) {
-                    if (mousePos.x <= figure.x) {
-                        figure.selectedGrabPoint = figure.grabPoints.left;
-                        figure.setSize(figure.cornerPoints.topLeft, figure.cornerPoints.bottomLeft);
-                    } else {
-                        let topRight = new Vector2(mousePos.x, figure.cornerPoints.topRight.y);
-                        figure.setSize(topRight, figure.cornerPoints.bottomLeft);
-                    }
-                }
-            },
-            top: {
-                position: new Vector2(
-                    this.x + this.width / 2,
-                    this.y
-                ),
-                action: function(mousePos) {
-                    if (mousePos.y >= figure.cornerPoints.bottomLeft.y) {
-                        figure.selectedGrabPoint = figure.grabPoints.bottom;
-                        figure.setSize(figure.cornerPoints.bottomRight, figure.cornerPoints.bottomLeft);
-                    } else {
-                        let topRight = new Vector2(figure.cornerPoints.topRight.x, mousePos.y);
-                        figure.setSize(topRight, figure.cornerPoints.bottomLeft);
-                    }
-                }
-            },
-            bottom: {
-                position: new Vector2(
-                    this.x + this.width / 2,
-                    this.y + this.height
-                ),
-                action: function(mousePos) {
-                    if (mousePos.y <= figure.y) {
-                        figure.selectedGrabPoint = figure.grabPoints.top;
-                        figure.setSize(figure.cornerPoints.topLeft, figure.cornerPoints.topRight);
-                    } else {
-                        let bottomLeft = new Vector2(figure.cornerPoints.bottomLeft.x, mousePos.y);
-                        figure.setSize(bottomLeft, figure.cornerPoints.topRight);
-                    }
-                }
-            },
-            topLeft: {
-                position: new Vector2(
-                    this.x,
-                    this.y
-                ),
-                action: function(mousePos) {
-                    if (mousePos.x >= figure.cornerPoints.topRight.x) {
-                        figure.selectedGrabPoint = figure.grabPoints.topRight;
-                        figure.setSize(new Vector2(figure.cornerPoints.topRight.x, mousePos.y), figure.cornerPoints.bottomRight);
-                    } else if (mousePos.y >= figure.cornerPoints.bottomLeft.y) {
-                        figure.selectedGrabPoint = figure.grabPoints.bottomLeft;
-                        figure.setSize(new Vector2(mousePos.x, figure.cornerPoints.bottomLeft.y), figure.cornerPoints.bottomRight);
-                    } else {
-                        figure.setSize(mousePos.clone(), figure.cornerPoints.bottomRight);
-                    }
-                }
-            },
-            topRight: {
-                position: new Vector2(
-                    this.x + this.width,
-                    this.y
-                ),
-                action: function(mousePos) {
-                    if (mousePos.x <= figure.x) {
-                        figure.selectedGrabPoint = figure.grabPoints.topLeft;
-                        figure.setSize(new Vector2(figure.cornerPoints.topLeft.x, mousePos.y), figure.cornerPoints.bottomLeft);
-                    } else if (mousePos.y >= figure.cornerPoints.bottomRight.y) {
-                        figure.selectedGrabPoint = figure.grabPoints.bottomRight;
-                        figure.setSize(new Vector2(mousePos.x, figure.cornerPoints.bottomRight.y), figure.cornerPoints.bottomLeft);
-                    } else {
-                        figure.setSize(mousePos.clone(), figure.cornerPoints.bottomLeft);
-                    }
-                }
-            },
-            bottomLeft: {
-                position: new Vector2(
-                    this.x,
-                    this.y + this.height
-                ),
-                action: function(mousePos) {
-                    if (mousePos.x >= figure.cornerPoints.bottomRight.x) {
-                        figure.selectedGrabPoint = figure.grabPoints.bottomRight;
-                        figure.setSize(new Vector2(figure.cornerPoints.bottomRight.x, mousePos.y), figure.cornerPoints.topRight);
-                    } else if (mousePos.y <= figure.y) {
-                        figure.selectedGrabPoint = figure.grabPoints.topLeft;
-                        figure.setSize(new Vector2(mousePos.x, figure.cornerPoints.topLeft.y), figure.cornerPoints.topRight);
-                    } else {
-                        figure.setSize(mousePos.clone(), figure.cornerPoints.topRight);
-                    }
-                }
-            },
-            bottomRight: {
-                position: new Vector2(
-                    this.x + this.width,
-                    this.y + this.height
-                ),
-                action: function(mousePos) {
-                    if (mousePos.x <= figure.x) {
-                        figure.selectedGrabPoint = figure.grabPoints.bottomLeft;
-                        figure.setSize(new Vector2(figure.cornerPoints.bottomLeft.x, mousePos.y), figure.cornerPoints.topLeft);
-                    } else if (mousePos.y <= figure.y) {
-                        figure.selectedGrabPoint = figure.grabPoints.topRight;
-                        figure.setSize(new Vector2(mousePos.x, figure.cornerPoints.topRight.y), figure.cornerPoints.topLeft);
-                    } else {
-                        figure.setSize(mousePos.clone(), figure.cornerPoints.topLeft);
-                    }
-                }
-            }
-        }
-    }
-
-    draw(canvas) {
-        canvas.context.fillStyle = this.color;
-    }
 
     drawBoundingBox(canvas) {
         let boundingColor = 'maroon';
@@ -226,8 +83,8 @@ class Figure {
         canvas.context.fillStyle = boundingColor;
         canvas.context.lineWidth = 2;
         canvas.context.strokeRect(this.x, this.y, this.width, this.height);
-        for (let grabPoint in this.grabPoints) { // draw every grab point
-            let pos = this.grabPoints[grabPoint].position;
+        for (let grabPoint in this.grabPoints.positions) { // draw every grab point
+            let pos = this.grabPoints.positions[grabPoint];
             canvas.context.beginPath();
             canvas.context.ellipse(pos.x, pos.y, canvas.grabPointSize / 2, canvas.grabPointSize / 2, 0, Math.PI * 2, 0);
             canvas.context.fill();
@@ -260,14 +117,13 @@ class Figure {
     toHTML() {
         return `<item id='${this.id}' onclick='CANVAS.selectById(${this.id})' onmousedown='CANVAS.startDragging(event)'>${this.constructor.name}</item>`;
     }
+    
+    toString() {
+        let stringVisitor = new GroupVisitor('string', '');
+        this.accept(stringVisitor);
+        return stringVisitor.result;
+    }
 
-    // toString(tabs = 0) {
-    //     let result = '';
-    //     for (let i = 0; i < tabs; i++)
-    //         result += '\t';
-
-    //     return result + `${this.constructor.name} ${this.x} ${this.y} ${this.width} ${this.height}\n`;
-    // }
     get indentation() {
         let parents = 0;
         if (!this.parent)
@@ -283,5 +139,4 @@ class Figure {
 
         return result + `${this.constructor.name} ${this.x} ${this.y} ${this.width} ${this.height}\n`;
     }
-
 }
