@@ -20,10 +20,7 @@ class DrawableFigure extends Figure {
     }
 
     get string() {
-        let result = '';
-        for (let i = 0; i < this.indentation; i++)
-            result += '\t';
-
+        let result = '\t'.repeat(this.indentation);
         return result + `${this.drawer.name} ${this.x} ${this.y} ${this.width} ${this.height}\n`;
     }
 }

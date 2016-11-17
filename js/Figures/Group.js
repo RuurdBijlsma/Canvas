@@ -101,9 +101,8 @@ class Group extends Figure {
 
     draw(context) {
         super.draw(context);
-        for (let figure of this.children)
-            if (figure.draw)
-                figure.draw(context);
+        let drawer = new ActionVisitor('draw', context);
+        this.accept(drawer);
     }
 
     getFigure(x, y) {
@@ -169,19 +168,12 @@ class Group extends Figure {
         for (let item of this.children)
             result += item.toHTML();
 
-        result += `</group-items>
+        return result + `</group-items>
         </group>`;
-        return result;
     }
 
     get string() {
-        let result = '';
-        for (let i = 0; i < this.indentation; i++)
-            result += '\t';
-
-        // result += `group ${this.children.filter(child=>!(child instanceof Group)).length}\n`;
-        result += `Group ${this.children.length}\n`;
-
-        return result;
+        let result = '\t'.repeat(this.indentation);
+        return result + `Group ${this.children.length}\n`;
     }
 }

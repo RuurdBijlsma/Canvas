@@ -1,4 +1,3 @@
-
 class GetVisitor extends Visitor {
     // Usage:
     // v = new GetVisitor('x', Infinity, (lowest, check) => check < lowest ? check : lowest);
