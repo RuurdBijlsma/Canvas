@@ -8,4 +8,4 @@ group 2
 		group 2
 			ellipse 50 150 20 50
 			ellipse 70 150 20 50
-		rectangle 100 100 10 10 
+		rectangle 100 100 10 10

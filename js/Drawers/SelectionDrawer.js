@@ -5,6 +5,6 @@ class SelectionDrawer extends Singleton {
     }
 
     get name() {
-        return 'Selection'
+        return 'selection'
     }
 }

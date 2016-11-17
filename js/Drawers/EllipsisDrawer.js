@@ -18,6 +18,6 @@ class EllipsisDrawer extends Singleton {
     }
 
     get name() {
-        return 'Ellipsis'
+        return 'ellipse'
     }
 }

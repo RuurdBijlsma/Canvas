@@ -173,7 +173,10 @@ class Group extends Figure {
     }
 
     get string() {
-        let result = '\t'.repeat(this.indentation);
-        return result + `Group ${this.children.length}\n`;
+        let result='';
+        for (let caption of this.captions)
+            result += caption.toString(this.indentation);
+        result += '\t'.repeat(this.indentation);
+        return result + `group ${this.children.length}\n`;
     }
 }

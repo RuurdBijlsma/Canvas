@@ -32,4 +32,9 @@ class Caption extends Figure {
             right: new Vector2(5, this.height / 2),
         }
     }
+
+    toString(indentation) {
+        let result = '\t'.repeat(indentation);
+        return result + `ornament ${this.side} "${this.text}"\n`;
+    }
 }

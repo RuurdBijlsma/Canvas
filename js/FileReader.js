@@ -60,9 +60,8 @@ class FileReader {
                         captionsToAdd.push(object);
                         break;
                 }
-                if (!(object instanceof Caption)) {
+                if (!(object instanceof Caption)) 
                     lastGroup.children.push(object);
-                }
             }
 
             if (!(object instanceof Caption)) {

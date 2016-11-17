@@ -20,7 +20,10 @@ class DrawableFigure extends Figure {
     }
 
     get string() {
-        let result = '\t'.repeat(this.indentation);
+        let result = '';
+        for (let caption of this.captions)
+            result += caption.toString(this.indentation);
+        result += '\t'.repeat(this.indentation);
         return result + `${this.drawer.name} ${this.x} ${this.y} ${this.width} ${this.height}\n`;
     }
 }

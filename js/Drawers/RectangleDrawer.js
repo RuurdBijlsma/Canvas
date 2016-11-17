@@ -8,6 +8,6 @@ class RectangleDrawer extends Singleton{
     }
 
     get name() {
-        return 'Rectangle'
+        return 'rectangle'
     }
 }
