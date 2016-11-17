@@ -101,8 +101,8 @@ class Group extends Figure {
 
     draw(context) {
         super.draw(context);
-        let drawer = new ActionVisitor('draw', context);
-        this.accept(drawer);
+        for(let child of this.children)
+            child.draw(context);
     }
 
     getFigure(x, y) {

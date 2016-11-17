@@ -31,7 +31,8 @@ class FileReader {
     static groupify(result) {
         let initialGroup = new Group();
         initialGroup.tabs = -1;
-        let lastGroup = initialGroup;
+        let lastGroup = initialGroup,
+            captionsToAdd = [];
         for (let object of result) {
             if (object.tabs <= lastGroup.tabs)
                 lastGroup = lastGroup.parent;
@@ -54,10 +55,23 @@ class FileReader {
                     case 'rectangle':
                         object = new DrawableFigure(lastGroup, RectangleDrawer, x, y, w, h, color, 0);
                         break;
+                    case 'ornament':
+                        object = new Caption(object.config[1].replace(/"/gi, ''), object.config[0]);
+                        captionsToAdd.push(object);
+                        break;
                 }
-                object.tabs = object.tabs;
-                if (object instanceof Figure) //geen ornaments enzo nog
+                if (!(object instanceof Caption)) {
                     lastGroup.children.push(object);
+                }
+            }
+
+            if (!(object instanceof Caption)) {
+                if (object.type)
+                    object = lastGroup;
+                if (captionsToAdd.length) console.log('adding these captions: ', captionsToAdd, 'to : ', object);
+                for (let caption of captionsToAdd)
+                    object.addCaption(caption);
+                captionsToAdd = [];
             }
         }
         FileReader.removeTabs(initialGroup);
