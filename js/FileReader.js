@@ -11,8 +11,7 @@ class FileReader {
 
     static processText(text) {
         let rules = text.split('\n').map(t => t.split('\t')),
-            result = [],
-            currentGroup = 0;
+            result = [];
 
         for (let rule of rules) {
             let type = rule[rule.length - 1].split(' ')[0],
@@ -56,20 +55,24 @@ class FileReader {
                         object = new DrawableFigure(lastGroup, RectangleDrawer, x, y, w, h, color, 0);
                         break;
                     case 'ornament':
-                        object = new Caption(object.config[1].replace(/"/gi, ''), object.config[0]);
                         captionsToAdd.push(object);
                         break;
                 }
-                if (!(object instanceof Caption)) 
-                    lastGroup.children.push(object);
             }
+            if (object instanceof Figure)
+                lastGroup.children.push(object);
 
-            if (!(object instanceof Caption)) {
-                if (object.type)
+            if (object instanceof Figure || object.type === 'group') {
+                if (object.type === 'group')
                     object = lastGroup;
+                let parent = object.parent;
                 if (captionsToAdd.length) console.log('adding these captions: ', captionsToAdd, 'to : ', object);
+                
                 for (let caption of captionsToAdd)
-                    object.addCaption(caption);
+                    object = new CaptionDecorator(object, caption.config[1].replace(/"/g, ''), caption.config[0]);
+
+                parent.children.pop();
+                parent.children.push(object);
                 captionsToAdd = [];
             }
         }

@@ -12,9 +12,11 @@ class Group extends Figure {
     accept(visitor) {
         if (visitor instanceof GroupVisitor)
             visitor.visit(this);
+
         if (this.children)
-            for (let child of this.children)
+            for (let child of this.children){
                 child.accept(visitor);
+            }
     }
 
     get cornerPoints() {
@@ -64,15 +66,13 @@ class Group extends Figure {
     }
 
     get height() {
-        let points = this.cornerPoints,
-            height = Math.abs(points.topLeft.y - points.bottomRight.y);
-        return height;
+        let points = this.cornerPoints;
+        return Math.abs(points.topLeft.y - points.bottomRight.y);
     }
 
     get width() {
-        let points = this.cornerPoints,
-            width = Math.abs(points.topLeft.x - points.bottomRight.x);
-        return width;
+        let points = this.cornerPoints;
+        return Math.abs(points.topLeft.x - points.bottomRight.x);
     }
 
     set height(newHeight) {
@@ -97,12 +97,6 @@ class Group extends Figure {
 
     isInFigure(x, y) {
         return this.getFigure(x, y);
-    }
-
-    draw(context) {
-        super.draw(context);
-        for(let child of this.children)
-            child.draw(context);
     }
 
     getFigure(x, y) {
@@ -164,7 +158,7 @@ class Group extends Figure {
     }
 
     toHTML() {
-        let result = `<group onmousedown='CANVAS.startDragging(event)'><group-name onclick='CANVAS.selectById(${this.id})' onmouseup='CANVAS.addToGroup(event)' id='${this.id}'>Group</group-name><group-items>`;
+        let result = `<group onmousedown='CANVAS.startDragging(event)'><group-name onclick='CANVAS.selectById(${this.id})' onmouseup='CANVAS.addToGroup(event)' id='${this.id}'>group</group-name><group-items>`;
         for (let item of this.children)
             result += item.toHTML();
 
@@ -173,7 +167,7 @@ class Group extends Figure {
     }
 
     get string() {
-        let result='';
+        let result = '';
         for (let caption of this.captions)
             result += caption.toString(this.indentation);
         result += '\t'.repeat(this.indentation);

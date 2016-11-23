@@ -13,15 +13,16 @@ class Canvas {
         this.grabPointSize = 10;
 
         this.setCanvasSize();
-        let canvas = this;
 
         this.undoStack = new UndoStack();
 
         this.figures = new Group();
-        FileReader.load('IO.txt').then(function(group) {
-            canvas.figures = group;
-            canvas.figures.domElement = document.getElementById('figure-list');
+        FileReader.load('IO.txt').then(group => {
+            this.figures = group;
+            this.figures.domElement = document.getElementById('figure-list');
         });
+
+        this.keyPressed = {};
 
         this.mouseInfo = {
             position: new Vector2(),
@@ -43,6 +44,8 @@ class Canvas {
         rightMenu.addEventListener('mousedown', e => e.stopPropagation());
         rightMenu.addEventListener('touchstart', e => e.stopPropagation());
 
+        document.addEventListener('keydown', e => this.keyPressed[e.key] = true);
+        document.addEventListener('keyup', e => this.keyPressed[e.key] = false);
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.addEventListener('keydown', e => this.handleKeyDown(e));
         document.addEventListener('mousedown', () => this.handleMouseDown());
@@ -50,11 +53,11 @@ class Canvas {
         document.addEventListener('mousemove', e => this.handleMove(e.pageX - this.element.offsetLeft, e.pageY - this.element.offsetTop));
         document.addEventListener('touchend', () => this.handleMouseUp());
         document.addEventListener('touchmove', e => this.handleMove(e.touches[0].pageX - this.element.offsetLeft, e.touches[0].pageY - this.element.offsetTop));
-        document.addEventListener('touchstart', function(e) {
-            let x = e.touches[0].pageX - canvas.element.offsetLeft,
-                y = e.touches[0].pageY - canvas.element.offsetTop;
-            canvas.handleMove(x, y);
-            canvas.handleMouseDown();
+        document.addEventListener('touchstart', e => {
+            let x = e.touches[0].pageX - this.element.offsetLeft,
+                y = e.touches[0].pageY - this.element.offsetTop;
+            this.handleMove(x, y);
+            this.handleMouseDown();
         });
         window.addEventListener('resize', () => this.setCanvasSize());
 
@@ -72,19 +75,21 @@ class Canvas {
 
     createSelection(figures) {
         if (figures.length !== 0) {
-            let selectionGroup = new SelectionGroup(figures);
-            this.selectedFigure = selectionGroup;
+            this.selectedFigure = new SelectionGroup(figures);
         }
     }
 
     selectById(id) {
         if (id)
             this._selectedFigure = this.figures.findById(id);
+        else
+            id = this.selectedFigure.id;
         let items = document.querySelectorAll('item, group-name');
         for (let item of items) {
             item.removeAttribute('selected');
-            if (item.id == id)
+            if (item.id == id) {
                 item.setAttribute('selected', '');
+            }
         }
         this.displayFigureInfo(this.selectedFigure);
     }
@@ -98,7 +103,7 @@ class Canvas {
                 item.removeAttribute('selected');
             infoElement.style.display = 'none';
         } else {
-            figureTitle.innerText = figure.constructor.name + ` (ID: ${figure.id})`;
+            figureTitle.innerText = figure.name + ` (ID: ${figure.id})`;
             infoElement.style.display = 'block';
             this.inputs.xPos.value = this.selectedFigure.x;
             this.inputs.yPos.value = this.selectedFigure.y;
@@ -118,20 +123,20 @@ class Canvas {
                     cornerPoints.topLeft, cornerPoints.bottomRight
                 ], [
                     cornerPoints.topLeft, cornerPoints.bottomRight.clone().add(value, 0)
-                ])
+                ]);
                 break;
             case 'height':
                 new SetFigureSize(this.selectedFigure, [
                     cornerPoints.topLeft, cornerPoints.bottomRight
                 ], [
                     cornerPoints.topLeft, cornerPoints.bottomRight.clone().add(0, value)
-                ])
+                ]);
                 break;
             case 'x':
-                new SetFigurePosition(this.selectedFigure, this.selectedFigure.position, this.selectedFigure.position.add(value - this.selectedFigure[property], 0))
+                new SetFigurePosition(this.selectedFigure, this.selectedFigure.position, this.selectedFigure.position.add(value - this.selectedFigure[property], 0));
                 break;
             case 'y':
-                new SetFigurePosition(this.selectedFigure, this.selectedFigure.position, this.selectedFigure.position.add(0, value - this.selectedFigure[property]))
+                new SetFigurePosition(this.selectedFigure, this.selectedFigure.position, this.selectedFigure.position.add(0, value - this.selectedFigure[property]));
                 break;
             case 'zIndex':
                 new SetFigureZIndex(this.selectedFigure, value);
@@ -181,12 +186,17 @@ class Canvas {
             }
 
             if (!this.selectedFigure.selectedGrabPoint)
-                if (this.selectedFigure.isInFigure(this.mouseInfo.position.x, this.mouseInfo.position.y)) {
+                if (this.selectedFigure.isInFigure(this.mouseInfo.position.x, this.mouseInfo.position.y))
+                    this.setMovePoint();
+
+            if (!this.selectedFigure.selectedGrabPoint && !this.movePoint) {
+                let clickedFigure = this.figures.getFigure(this.mouseInfo.position.x, this.mouseInfo.position.y);
+                if (this.keyPressed.Shift) {
+                    this.createSelection([this.selectedFigure, clickedFigure]);
+                } else {
+                    this.selectedFigure = clickedFigure;
                     this.setMovePoint();
                 }
-            if (!this.selectedFigure.selectedGrabPoint && !this.movePoint) {
-                this.selectedFigure = this.figures.getFigure(this.mouseInfo.position.x, this.mouseInfo.position.y);
-                this.setMovePoint();
             }
         }
         this.displayFigureInfo(this.selectedFigure);
@@ -236,7 +246,7 @@ class Canvas {
                 id: e.target.id,
                 original: targetElement,
                 clone: targetElement.cloneNode()
-            }
+            };
             this.dragging.clone.style.position = 'fixed';
             this.dragging.clone.style.pointerEvents = 'none';
             this.dragging.clone.innerHTML = this.dragging.original.innerHTML;
@@ -291,7 +301,7 @@ class Canvas {
             this.setCursor('default');
     }
 
-    handleMouseUp(e) {
+    handleMouseUp() {
         this.mouseInfo.mouseDown = false;
         if (this.boxSelection) {
             let cornerPoints = this.boxSelection.figure.cornerPoints,
@@ -330,7 +340,8 @@ class Canvas {
     render() {
         this.context.clearRect(0, 0, this.width, this.height);
 
-        this.figures.draw(this.context);
+        let drawer = new DrawVisitor(this.context);
+        this.figures.accept(drawer);
 
         if (this.selectedFigure) this.selectedFigure.drawBoundingBox(this);
 

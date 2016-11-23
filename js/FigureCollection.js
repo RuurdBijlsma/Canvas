@@ -21,7 +21,6 @@ class FigureCollection extends Array {
         for (let figure of figures) {
             super.push(figure);
 
-            let that = this;
             if (figure instanceof Figure)
                 figure.zIndexUpdated = () => this.sort();
         }

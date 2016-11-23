@@ -4,4 +4,5 @@ class Visitor {
         this.value = value;
         this.operation = operation;
     }
+    visit(figure) {}
 }

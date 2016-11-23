@@ -19,6 +19,10 @@ class DrawableFigure extends Figure {
         return `<item id='${this.id}' onclick='CANVAS.selectById(${this.id})' onmousedown='CANVAS.startDragging(event)'>${this.drawer.name}</item>`;
     }
 
+    get name() {
+        return this.drawer.name;
+    }
+
     get string() {
         let result = '';
         for (let caption of this.captions)

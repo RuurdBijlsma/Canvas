@@ -1,5 +1,7 @@
 class Figure {
-    constructor(parent, x, y, width, height, zIndex = 0) {
+    constructor(parent, x, y, width, height, zIndex = 0, decorated = false) {
+        if (decorated)
+            return;
         this.x = x;
         this.y = y;
         this.width = width;
@@ -12,22 +14,9 @@ class Figure {
         this.zIndexUpdated = function() {};
         this.zIndex = zIndex;
         this.grabPoints = new GrabPointCalculator(this);
-
-        this.captions = [];
     }
 
     draw(context) {
-        for (let caption of this.captions)
-            caption.draw(context);
-    }
-
-    addCaption(caption) {
-        caption.figure = this;
-        this.captions.push(caption);
-    }
-    removeCaption(caption) {
-        let index = this.captions.indexOf(caption);
-        this.captions.splice(index, 1);
     }
 
     accept(visitor) {
@@ -149,8 +138,11 @@ class Figure {
         return stringVisitor.result;
     }
 
+    get name() {
+        return this.constructor.name.toLowerCase();
+    }
+
     get indentation() {
-        let parents = 0;
         if (!this.parent)
             return -1;
         else
@@ -162,6 +154,6 @@ class Figure {
         for (let caption of this.captions)
             result += caption.toString(this.indentation);
         result += '\t'.repeat(this.indentation);
-        return result + `${this.constructor.name} ${this.x} ${this.y} ${this.width} ${this.height}\n`;
+        return result + `${this.name} ${this.x} ${this.y} ${this.width} ${this.height}\n`;
     }
 }
