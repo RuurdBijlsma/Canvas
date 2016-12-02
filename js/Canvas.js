@@ -1,5 +1,6 @@
 //onfixbare bug:
 //Als je group resized van grabpoint naar andere grabpoint doet ie dom
+//Als je de decorated group verplaatst in de lijst gaat alles fout
 //todo
 //refactor code
 class Canvas {
