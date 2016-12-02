@@ -14,7 +14,7 @@ class Group extends Figure {
             visitor.visit(this);
 
         if (this.children)
-            for (let child of this.children){
+            for (let child of this.children) {
                 child.accept(visitor);
             }
     }
@@ -112,7 +112,7 @@ class Group extends Figure {
         let figures = [];
 
         for (let child of this.children)
-            if (child instanceof Group)
+            if (child.children)
                 figures = figures.concat(child.getFiguresFromSelection(topLeft, bottomRight));
             else if (child.isInSelection(topLeft, bottomRight)) figures.push(child);
 
@@ -140,12 +140,8 @@ class Group extends Figure {
         if (id === this.id)
             return this;
         for (let child of this.children) {
-            if (child.id === id)
-                return child;
-            else if (child instanceof Group) {
-                let found = child.findById(id);
-                if (found) return found;
-            }
+            let found = child.findById(id);
+            if (found) return found;
         }
         return undefined;
     }
@@ -153,7 +149,7 @@ class Group extends Figure {
     remove(figure) {
         this.children.remove(figure);
         for (let child of this.children)
-            if (child instanceof Group)
+            if (child.children)
                 child.remove(figure);
     }
 
@@ -168,8 +164,8 @@ class Group extends Figure {
 
     get string() {
         let result = '';
-        for (let caption of this.captions)
-            result += caption.toString(this.indentation);
+        // for (let caption of this.captions)
+        //     result += caption.toString(this.indentation);
         result += '\t'.repeat(this.indentation);
         return result + `group ${this.children.length}\n`;
     }

@@ -19,10 +19,9 @@ class FigureDecorator extends Figure {
         this.figure.draw(context);
     }
     accept(visitor) {
-        if (visitor instanceof DrawVisitor) {
+        if (visitor instanceof DrawVisitor || visitor instanceof GroupVisitor) {
             super.accept(visitor);
         }
-
         this.figure.accept(visitor);
     }
     get position() {
@@ -92,6 +91,38 @@ class FigureDecorator extends Figure {
         return this.figure.indentation;
     }
     get string() {
-        return this.figure.string;
+            return this.figure.string;
+        }
+        // Group Specific functions
+    isInFigure(x, y) {
+        return this.figure.isInFigure(x, y);
+    }
+
+    getFigure(x, y) {
+        return this.figure.getFigure(x, y);
+    }
+
+    getFiguresFromSelection(topLeft, bottomRight) {
+        return this.figure.getFiguresFromSelection(topLeft, bottomRight);
+    }
+
+    set domElement(element) {
+        this.figure.domElement = element;
+    }
+
+    updateHTML() {
+        return this.figure.updateHTML();
+    }
+
+    findById(id) {
+        return this.figure.findById(id);
+    }
+
+    remove(figure) {
+        return this.figure.remove(figure);
+    }
+
+    toHTML() {
+        return this.figure.toHTML();
     }
 }

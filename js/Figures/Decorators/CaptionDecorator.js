@@ -37,4 +37,11 @@ class CaptionDecorator extends FigureDecorator {
             right: new Vector2(5, this.captionHeight / 2),
         }
     }
+
+    get string() {
+        let result = '\t'.repeat(this.figure.indentation);
+        result += `ornament ${this.side} "${this.text}"\n`;
+
+        return result;
+    }
 }

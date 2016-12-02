@@ -73,6 +73,12 @@ class Figure {
         }
     }
 
+    findById(id){
+        if(id===this.id)
+            return this;
+        else return undefined;
+    }
+
     fixPoints(pointA, pointB) {
         let xs = [pointA.x, pointB.x].sort((a, b) => a - b),
             ys = [pointA.y, pointB.y].sort((a, b) => a - b);
